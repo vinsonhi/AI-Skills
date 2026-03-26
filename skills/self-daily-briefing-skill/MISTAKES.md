@@ -167,3 +167,31 @@ I attempted to construct a search query for the Algolia HN API by simply joining
 ### 4. Lesson (教训)
 - "Relevant" is not the same thing as "new".
 - In a daily brief, stale lead items are factual quality problems, not just editorial style issues.
+
+---
+
+## 📌 Issue: Stock Snapshot Fallback Corruption | 股票快照降级导致价格与判断同时失真 (2026-03-26)
+
+### 1. The Error (错误现场)
+- **Problem**: The stock section shipped with wrong prices, and `ASX` was explicitly written as weak even though the correct same-round price was around `$22.40` and the stock was up strongly.
+- **What happened**: Instead of sticking to a single authoritative batch snapshot, I silently degraded to quote-page scraping and then wrote commentary on top of those wrong numbers.
+- **Result**: Numeric facts were wrong, relative strength judgments were wrong, and the report looked internally consistent while actually being false.
+
+### 2. The Root Cause (根本原因)
+- **Spec violation**: The skill already said the stock section must use one `web.finance` batch snapshot. I still allowed a page-scrape fallback into the final report.
+- **Missing gate**: There was no hard validation step that compared final markdown numbers against the primary snapshot before publishing.
+- **Wrong optimization target**: I optimized for “produce a filled stock table” instead of “only publish if the prices are validated”.
+
+### 3. The Fix (修复方案)
+- **Hard rule**: no single-batch authoritative snapshot means no stock table; write a data gap instead.
+- **Hard rule**: quote pages and search snippets can be used only for debugging, never as a substitute primary price source.
+- **Mandatory validation**:
+  1. Validate ticker coverage against the watchlist.
+  2. Validate `price / change / change_percent / trade_time` completeness.
+  3. Validate the final markdown numbers against the primary snapshot exactly.
+  4. Optionally run a secondary-source drift check, but treat it only as an alarm.
+- **Order of operations**: validate prices first, then write commentary. Never the other way around.
+
+### 4. Lesson (教训)
+- In a market brief, wrong numbers are not “minor drift”; they invalidate the downstream interpretation.
+- A fallback that changes the truth source is not graceful degradation. It is a data integrity failure.

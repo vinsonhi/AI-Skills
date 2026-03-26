@@ -26,14 +26,19 @@ description: "自用日报 skill。用于生成综合早报、财经早报、科
 - 如果用户直接给了某个板块的完整版本，按用户版本原文覆盖该板块，不要改写措辞。
 - 缺数据就写缺口，不补推断性内容。
 - 综合/财经/科技这类“今天发生了什么”的板块，默认只收当天新增事件或当天有明确新进展的延续事件。
+- 当前默认时效门槛是**最近 24 小时**；不满足这个窗口的条目不得因为“缺内容”而自动补进今天成稿。
 - 如果某条信息只是前几天已经写过的旧闻、今天没有明确增量，就不能伪装成今天头条；要么删掉，要么明确标记为“延续跟踪”。
 - 生成综合早报前，必须对最近 3 天内已交付的同类成稿做标题级去重检查；如果同一事件已经在近几天做过主条且今天没有实质新进展，不得再次放进 `全网速览` 前列。
+- 每个板块不要求凑固定条数；宁可直接写 `### 📌 数据缺口`，也不要回填 24 小时窗口之外的旧稿。
 - PDF 要尽量保留 Markdown 原始阅读结构，优先走“Markdown -> HTML 阅读页 -> 浏览器导出 PDF”，不要自创杂志式重排。
 - HTML 导出 PDF 的正确链路固定为：`Markdown -> 完整 HTML 文件 -> 浏览器直接打开该 HTML 页面 -> 浏览器打印 PDF`。
+- 对本机运行环境，PDF 默认优先使用用户机器上已安装、正在使用的 **系统 Google Chrome** 直接打印；不要先走沙箱里的临时 Chromium / Playwright profile，再把失败结果误判成“浏览器不可用”。
+- 如果系统 Chrome 可用，优先复用它来打开本地 HTML 并导出 PDF；只有在系统 Chrome 本身不可用时，才允许把 PDF 标记为“被阻塞”。
 - 禁止把整篇 HTML 用 `data:` URL 注入浏览器后再打印长文 PDF；这条链路会发生静默截断，导致后半篇缺页。
 - 禁止把 `reportlab` 当作 HTML/Markdown 阅读页的默认 PDF 导出器；它只能用于程序化排版文档，不能保证与 HTML 阅读结构一致。
 - 如果浏览器直打链路不可用，应明确报错说明卡点，并把 PDF 状态标记为“未完成 / 被阻塞”；不要静默切换到低保真方案后继续交付。
 - 对 Morning Brief 这类要求 HTML 保真的交付，`reportlab` fallback 不算成功交付，只能算失败占位。
+- 任何日报流程如果启动了 `http.server`、系统 Chrome headless、Playwright、MCP、或其他临时后台进程，交付前必须主动做收尾，确保这些进程在任务结束后退出；不能把清理动作留给下次重启。
 - PDF 导出完成后，必须核对 HTML 和 PDF 内容是否完整一致，至少完成以下检查：
   - `pdfinfo` 检查页数是否与内容规模相符，不能异常偏少。
   - `pdftotext` 提取 PDF 尾部文本，并与 HTML 尾部文本逐段对比，确保最后一个板块完整出现。
@@ -103,6 +108,12 @@ python3 /Users/bytedance/.codex/skills/.system/skill-installer/scripts/install-s
 #### AI 深度日报里的 X 板块规则
 
 - X 不是匿名抓公开搜索，而是复用用户登录后的个人时间线。
+- 对这类登录态来源，默认先复用**用户自己正在使用的本机 Google Chrome 会话**，不要先启动沙箱里的临时浏览器、匿名 profile、或无状态 Playwright context。
+- 可接受的“复用个人 Chrome”方式包括：
+  - 直接连接 / 驱动用户本机已开启的 Chrome；
+  - 直接读取用户本机 Chrome profile / cookie jar 来复用现有登录态；
+  - 在同一台机器上用系统 Chrome 打开目标页面并沿用该用户 profile。
+- 不要把“沙箱浏览器没登录”误判成“用户 X 登录态失效”。只有当用户本机 Chrome 自身的会话也无效时，才允许标记为登录态失效。
 - 必须同时看两路：
   - `Following`
   - `Recommended / For you`
@@ -113,17 +124,38 @@ python3 /Users/bytedance/.codex/skills/.system/skill-installer/scripts/install-s
 - 最终输出仍要遵守日报格式：`Source`、`Time`、`Summary`、`Deep Dive`。
 - 缺正文就写缺口，不要把猜测当事实。
 - 如果 X 或其他需要登录的来源出现登录过期、登录页、扫码、验证码、或权限校验，不能把它当作普通“数据缺口”直接跳过。
-- 这类情况必须明确标记为“登录态失效”，并停在可恢复步骤上，等待用户手动完成登录后再继续。
+- 在判定“登录态失效”之前，必须先验证用户本机 Chrome 的真实会话；如果只是沙箱浏览器、临时 profile、或隔离 Playwright context 没有登录，不算用户登录态失效。
+- 只有在用户本机 Chrome 的真实会话也失效时，才允许明确标记为“登录态失效”，并停在可恢复步骤上。
 - 登录失效时，不能私自改用匿名抓取、公开搜索、替代站点、或完全不同的技术路线来冒充同一数据源。
+
+#### 本机 Chrome 执行约定
+
+- 默认 Chrome 路径：`/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`
+- 默认 profile 根目录：`~/Library/Application Support/Google/Chrome/`
+- 验证 X 会话时，优先检查本机 Chrome 里是否已有 `x.com` 的 `auth_token` 和 `ct0` 等登录 cookie，并以 `https://x.com/home` 的实际返回结果为准。
+- 可复用脚本：
+  - `scripts/real_chrome_helpers.py`
+  - `scripts/check_x_personal_chrome_session.py`
+  - `scripts/extract_x_timeline_with_personal_chrome.py`
+  - `scripts/export_pdf_with_system_chrome.sh`
+  - `scripts/filter_recent_brief_items.py`
+- 使用上述脚本后，若本轮任务额外拉起了 Chrome headless、本地 HTTP server、Playwright MCP、或其他浏览器自动化辅助进程，结束前必须再次检查并关闭它们。
 
 ### 5. 美股股票早报
 - 适用场景：要看自选股票的最新价格、涨跌、驱动因素和重要新闻
-- 默认观察名单：见 `instructions/us_stocks_watchlist_default.txt`；可复用版本默认留空，如果为空必须先向用户要股票列表，不能自行猜测
+- 默认观察名单：见 `instructions/us_stocks_watchlist_default.txt`；可复用版本允许留空，由使用者自行填写
 - 信息源：
   - 最新价格：优先用 `web.finance`
   - 涨跌幅：用最新价和昨收价计算
   - 驱动因素：公司 IR、财报、官方博客、官方新闻稿
   - 重要新闻：优先 Reuters，其次公司官网和权威媒体
+- 如果某个网页源、爬虫链路或公开 API（例如 Yahoo 页面 / 无认证接口）被频控、超时、或返回不稳定结果，**不能**直接把整块标成“拿不到”。
+- 正确处理顺序是：
+  1. 先用同一轮 `web.finance` 批量拿完整观察名单快照；
+  2. 若 `web.finance` 本身失败，再尝试其他能一次性返回同轮价格的正式来源；
+  3. 只有当“同轮批量快照”这件事本身确实失败时，才允许写数据缺口。
+- 禁止因为单一来源失败，就回退成旧日报数字、逐只股票零散搜价、或连续几天都保留同样的“统一快照缺口”占位。
+- 禁止把 Google Finance / Yahoo / 搜索结果页上的单页 quote 当作主价格源直接写进日报；这些来源只能用于排错，不可替代同轮批量快照。
 - 时间口径规则：
   - 默认使用“生成时最新价快照”，不是自动回退成“上一交易日收盘后版本”。
   - 全部股票必须来自同一轮 `web.finance` 查询，不能混用不同时间点或不同来源的价格。
@@ -135,6 +167,12 @@ python3 /Users/bytedance/.codex/skills/.system/skill-installer/scripts/install-s
     - 周日运行：默认不做价格对比，只收集信息、催化、官方新闻和下周观察点。
     - 周一运行：默认写最近一个美股交易日的盘后价格波动和信息更新，不能伪装成新的周一盘中价格。
   - 周日和周一如果采用最近一个交易日收盘口径，板块顶部必须明确写清对应的是哪个美东交易日。
+- 二次校验规则：
+  - 在写 Markdown 之前，必须校验最终要写入的 ticker、价格、涨跌额、涨跌幅、时间戳与主快照逐项一致。
+  - 允许用第二来源做漂移检测，但第二来源只能用来发现异常，不能用来覆盖主快照。
+  - 如果任一 ticker 出现明显漂移、交易所映射异常、时间戳显著不一致，整块股票板块必须阻断并写明待核实，不要继续生成方向判断。
+  - 股票叙述和一句话判断只能在数值校验通过后生成。
+  - 建议同时保存原始主快照；可复用 `scripts/validate_us_stocks_snapshot.py` 做批量校验。
 
 ## 日报格式示例
 
@@ -258,24 +296,24 @@ python3 /Users/bytedance/.codex/skills/.system/skill-installer/scripts/install-s
 
 | Ticker | 最新价 | 较昨收变动 | 一句话判断 |
 |---|---:|---:|---|
-| TICKER_A | $100.00 | +1.25 / +1.27% | 核心催化延续，短线偏强 |
-| TICKER_B | $55.20 | -0.40 / -0.72% | 缺少新增催化，走势偏震荡 |
+| NVDA | $184.77 | +2.13 / +1.16% | GTC 预期继续支撑 |
+| AMD | $203.23 | +0.56 / +0.28% | Meta 大单逻辑还在，日内偏稳 |
 
-## TICKER_A
-- **最新股价**：$100.00
-- **较昨天**：+1.27%
-- **关键因素**：新品预期、客户采用、生态合作。
+## NVDA
+- **最新股价**：$184.77
+- **较昨天**：+1.16%
+- **关键因素**：GTC 预期、产品发布、生态合作。
 - **重要新闻**：
-  - [公司官方新闻](https://example.com)
-- **我的判断**：主线逻辑未破坏，资金仍在交易核心叙事。
+  - [NVIDIA GTC 2026 官方预告](https://example.com)
+- **我的判断**：会前预热行情仍在。
 
-## TICKER_B
-- **最新股价**：$55.20
-- **较昨天**：-0.72%
-- **关键因素**：缺少新增催化，更多受板块情绪影响。
+## AMD
+- **最新股价**：$203.23
+- **较昨天**：+0.28%
+- **关键因素**：Meta 大规模 GPU 部署合作仍在支撑逻辑。
 - **重要新闻**：
-  - [公司投资者关系页面](https://example.com)
-- **我的判断**：短线偏弱，但还需要结合后续基本面验证。
+  - [AMD 与 Meta 扩大战略合作](https://example.com)
+- **我的判断**：大涨后进入消化阶段。
 
 ...省略
 ```
@@ -295,6 +333,7 @@ python3 scripts/daily_briefing.py --profile ai_daily
 - 语言：简体中文
 - 必带字段：标题、时间、摘要、Deep Dive
 - 不编造新闻，不补不存在的数据
+- 对综合 / 财经 / 科技 / AI 深度板块，先经过 `最近 24 小时` 过滤，再做近 3 天成稿去重；过不了这两道门槛的条目不能进入最终稿。
 - 保存路径：
   - `reports/YYYY-MM-DD/general_report.md`
   - `reports/YYYY-MM-DD/finance_report.md`
@@ -310,6 +349,7 @@ python3 scripts/daily_briefing.py --profile ai_daily
    - `reports/YYYY-MM-DD/tech_report.md`
    - `reports/YYYY-MM-DD/ai_daily_report.md`
 2. 如果不存在，就先按对应 profile 生成。
+2.1 对 raw items 先执行近 24 小时过滤；可复用 `scripts/filter_recent_brief_items.py` 对候选条目做时效与近 3 天去重检查。
 3. 合并时按以下顺序直接拼接：
    - 综合早报
    - 财经早报
@@ -321,32 +361,38 @@ python3 scripts/daily_briefing.py --profile ai_daily
 6. 最终合并稿默认同时输出两份：
    - `reports/YYYY-MM-DD/merged_daily_report.md`
    - `reports/YYYY-MM-DD/merged_daily_report.pdf`
+6.1 PDF 导出默认复用 `scripts/export_pdf_with_system_chrome.sh`：先把 HTML 通过 localhost 暴露，再让系统 Chrome 打印，禁止回退到 `file:// + print-to-pdf`。
 7. 如果用户指定路径，则在用户路径下保存同名 `.md` 和 `.pdf`。
 
 ## 美股股票早报工作流
 
-1. 先读取用户给的股票列表；如果用户没给，再检查默认观察名单。
-2. 如果默认观察名单也是空的，必须先向用户要股票列表，不能自行猜测或擅自补全。
-3. 用一次 `web.finance` 调用获取所有股票的最新价格和昨收，锁定为同一轮行情快照。
-4. 用搜索获取近 1-7 天的重要新闻：
+1. 读取用户给的股票列表；如果没给，就用默认观察名单。
+2. 用一次 `web.finance` 调用获取所有股票的最新价格和昨收，锁定为同一轮行情快照。
+2.1 立刻把原始快照落盘，并运行 `scripts/validate_us_stocks_snapshot.py`：
+   - 校验观察名单是否齐全；
+   - 校验关键数字字段是否完整；
+   - 校验时间戳是否保持同轮口径；
+   - 若接入了第二来源，做漂移检测但不要用它覆盖主源。
+2.2 若校验失败，直接输出数据缺口或“待核实”，不要继续写股票判断。
+3. 用搜索获取近 1-7 天的重要新闻：
    - 优先 Reuters
    - 其次公司 IR / 新闻稿
    - 再其次权威媒体
-5. 先确定并写明价格时间口径：
+4. 先确定并写明价格时间口径：
    - 默认：`生成时最新价快照`
    - 仅在用户明确要求时：`上一交易日收盘后版本`
    - 北京时间周六：默认允许使用周五收盘口径
    - 北京时间周日：默认改为“信息版”，不做价格对比
    - 北京时间周一：默认改为“最近一个美股交易日盘后波动 + 信息版”
-6. 对同一份报告里的所有股票，判断必须围绕同一轮价格口径来写；如果当天缺少个股催化，要明确写“主要受板块 / 市场情绪驱动”。
-7. 对每只股票输出：
+5. 对同一份报告里的所有股票，判断必须围绕同一轮价格口径来写；如果当天缺少个股催化，要明确写“主要受板块 / 市场情绪驱动”。
+6. 对每只股票输出：
    - 最新价
    - 较昨收变动（绝对值和百分比）
    - 关键因素
    - 重要新闻链接
    - 一句话判断
-8. 保存到 `reports/YYYY-MM-DD/us_stocks_report.md`
-9. 如用户要求便于阅读的导出，再额外输出 `reports/YYYY-MM-DD/us_stocks_report.pdf`
+7. 保存到 `reports/YYYY-MM-DD/us_stocks_report.md`
+8. 如用户要求便于阅读的导出，再额外输出 `reports/YYYY-MM-DD/us_stocks_report.pdf`
 
 ### 美股股票早报模板
 
@@ -357,12 +403,12 @@ python3 scripts/daily_briefing.py --profile ai_daily
 
 | Ticker | 最新价 | 较昨收变动 | 一句话判断 |
 |---|---:|---:|---|
-| TICKER_A | $100.00 | +1.25 / +1.27% | 核心催化延续，短线偏强 |
+| NVDA | $184.77 | +2.13 / +1.16% | GTC 预期继续支撑 |
 
-## TICKER_A
-- **最新股价**：$100.00
-- **较昨天**：+1.27%
-- **关键因素**：新品预期、客户采用、订单、CapEx、生态合作。
+## NVDA
+- **最新股价**：$184.77
+- **较昨天**：+1.16%
+- **关键因素**：GTC 预期、产品发布、订单、CapEx、生态合作。
 - **重要新闻**：
   - [新闻标题](https://example.com)
 - **我的判断**：一句话说明今天为何涨跌。
