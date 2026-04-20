@@ -75,10 +75,10 @@ python3 /Users/bytedance/.codex/skills/.system/skill-installer/scripts/install-s
 
 1. **自我介绍**：说明这个 skill 会生成综合、财经、科技、AI 深度和美股自选 Morning Brief。
 2. **语言偏好**：询问中文、英文或双语；默认中文，并保留关键英文产品名、论文名和公司名。
-3. **股票跟踪偏好和额外关注**：询问美股 ticker 列表，以及用户想长期关注的公司、产品、人物或主题。如果用户说没有，告诉用户以后随时能补充；不要自行猜测默认股票。
+3. **股票跟踪偏好和额外关注**：询问美股 ticker 列表，以及用户想长期关注的公司、产品、人物或主题。如果用户说没有，告诉用户会先用 Mag 7（AAPL、MSFT、NVDA、AMZN、GOOGL、META、TSLA）作为默认名单，以后随时能改。
 4. **展示信息源并询问是否运行一遍**：展示 X builders、播客、官方博客等默认源，问用户是否现在先跑一版看效果。
 
-如果用户给出 ticker 列表，把列表写入**本地已安装 skill** 的 `instructions/us_stocks_watchlist_default.txt`，一行一个 ticker；公开仓库版本默认保持为空，不提交个人观察名单。
+如果用户给出 ticker 列表，把列表写入**本地已安装 skill** 的 `instructions/us_stocks_watchlist_default.txt`，一行一个 ticker；如果用户没有给，使用公开版本内置的 Mag 7 默认名单，不要留空。
 
 可复用脚本：
 
@@ -176,7 +176,7 @@ python3 scripts/onboarding.py --force
 
 ### 5. 美股股票早报
 - 适用场景：要看自选股票的最新价格、涨跌、驱动因素和重要新闻
-- 默认观察名单：见 `instructions/us_stocks_watchlist_default.txt`；可复用版本允许留空，由使用者自行填写
+- 默认观察名单：见 `instructions/us_stocks_watchlist_default.txt`；公开版本默认内置 Mag 7（AAPL、MSFT、NVDA、AMZN、GOOGL、META、TSLA），用户可在 onboarding 或后续对话中改成自己的名单
 - 信息源：
   - 最新价格：优先用 `web.finance`
   - 涨跌幅：用最新价和昨收价计算

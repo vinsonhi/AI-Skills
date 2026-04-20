@@ -15,6 +15,7 @@ ONBOARDING_STATE_PATH = SKILL_ROOT / "instructions" / ".local_onboarding_state.j
 X_ACCOUNTS_PATH = SKILL_ROOT / "instructions" / "x_ai_accounts.txt"
 PODCASTS_PATH = SKILL_ROOT / "instructions" / "ai_podcasts.txt"
 BLOGS_PATH = SKILL_ROOT / "instructions" / "ai_official_blogs.txt"
+DEFAULT_WATCHLIST = ["AAPL", "MSFT", "NVDA", "AMZN", "GOOGL", "META", "TSLA"]
 
 
 def normalize_tickers(raw: str) -> list[str]:
@@ -36,6 +37,20 @@ def normalize_tickers(raw: str) -> list[str]:
 def write_watchlist(tickers: list[str]) -> None:
     WATCHLIST_PATH.parent.mkdir(parents=True, exist_ok=True)
     WATCHLIST_PATH.write_text("\n".join(tickers) + "\n", encoding="utf-8")
+
+
+def read_watchlist() -> list[str]:
+    if not WATCHLIST_PATH.exists():
+        return []
+    return [
+        line.strip().upper()
+        for line in WATCHLIST_PATH.read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.startswith("#")
+    ]
+
+
+def has_custom_watchlist(tickers: list[str]) -> bool:
+    return bool(tickers) and tickers != DEFAULT_WATCHLIST
 
 
 def count_data_lines(path: Path) -> int:
@@ -117,7 +132,8 @@ def main() -> int:
         print("日报偏好已经设置过了。之后直接生成日报即可；如果你想调整股票、语言或关注主题，告诉我“重新设置日报偏好”。")
         return 0
 
-    existing = WATCHLIST_PATH.read_text(encoding="utf-8").strip() if WATCHLIST_PATH.exists() else ""
+    existing_watchlist = read_watchlist()
+    custom_watchlist = has_custom_watchlist(existing_watchlist)
     x_count = count_data_lines(X_ACCOUNTS_PATH)
     podcast_names = first_column_values(PODCASTS_PATH)
     blog_names = first_column_values(BLOGS_PATH)
@@ -131,11 +147,11 @@ def main() -> int:
     print("如果你没有特别偏好，我会默认用中文，并保留关键英文产品名、论文名和公司名。")
     print("")
     print("Step 3 — 股票跟踪偏好和额外关注")
-    if existing:
+    if custom_watchlist:
         print("我看到你本地已经有一份美股观察名单；要更新的话，直接给我新的 ticker 列表就行。")
     else:
         print("你有想长期关注的美股股票吗？有的话直接发 ticker，例如：NVDA, AMD, MSFT。")
-        print("还没想好也没关系，回复“没有”即可；以后想加的时候再告诉我。")
+        print(f"还没想好也没关系，我会先用 Mag 7：{', '.join(DEFAULT_WATCHLIST)}。以后想改的时候再告诉我。")
     print("除了股票，也可以告诉我你特别想关注的公司、产品、人物或主题，比如 Claude Code、机器人、AI 搜索、OpenAI、Anthropic、英伟达产业链。")
     print("")
     print("Step 4 — 信息源确认")
@@ -160,7 +176,16 @@ def main() -> int:
             print("已记下你的美股观察名单，之后美股早报会默认跟踪：")
             print(", ".join(tickers))
         else:
-            print("未写入股票名单；之后可随时补充。")
+            if not custom_watchlist:
+                write_watchlist(DEFAULT_WATCHLIST)
+                print("已先使用 Mag 7 作为默认美股观察名单：")
+                print(", ".join(DEFAULT_WATCHLIST))
+            else:
+                print("未更新股票名单；继续使用你本地已有的观察名单。")
+    elif not existing_watchlist:
+        write_watchlist(DEFAULT_WATCHLIST)
+        print("已先使用 Mag 7 作为默认美股观察名单：")
+        print(", ".join(DEFAULT_WATCHLIST))
     if args.language or args.interests:
         print("已记下你的日报偏好。")
     mark_onboarding_complete()

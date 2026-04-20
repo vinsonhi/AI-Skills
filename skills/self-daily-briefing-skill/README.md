@@ -37,10 +37,10 @@ onboarding 会问四件事：
 
 1. 先简单介绍它会帮你生成什么日报。
 2. 问你想用中文、英文还是双语；默认中文。
-3. 问你有没有长期关注的美股 ticker，以及有没有特别想关注的公司、产品、人物或主题。
+3. 问你有没有长期关注的美股 ticker，以及有没有特别想关注的公司、产品、人物或主题；如果你不填，先默认跟踪 Mag 7。
 4. 展示默认信息源，并问你要不要现在先跑一版看看效果。
 
-你的股票名单和偏好只会记在这台电脑本地；公开仓库不内置个人股票名单。
+你的股票名单和偏好只会记在这台电脑本地；公开仓库只内置 Mag 7 作为通用默认名单，不内置任何个人股票名单。
 
 ## 怎么使用
 
@@ -185,7 +185,11 @@ reports/YYYY-MM-DD/merged_daily_report.pdf
 
 ## 美股观察名单
 
-公开版本默认不内置个人股票名单。
+公开版本默认跟踪 Mag 7：
+
+```text
+AAPL, MSFT, NVDA, AMZN, GOOGL, META, TSLA
+```
 
 第一次 onboarding 时，如果你给了 ticker，Codex 会记在本地：
 
@@ -193,7 +197,7 @@ reports/YYYY-MM-DD/merged_daily_report.pdf
 instructions/us_stocks_watchlist_default.txt
 ```
 
-之后生成美股早报时会默认使用这份名单。你也可以随时说：
+如果你没有给 ticker，就先沿用 Mag 7；如果你给了自己的 ticker，之后生成美股早报时会默认使用你的名单。你也可以随时说：
 
 ```text
 把我的美股观察名单改成 NVDA、AMD、MSFT、META

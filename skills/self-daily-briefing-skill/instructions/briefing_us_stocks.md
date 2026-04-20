@@ -4,7 +4,9 @@
 
 给用户的自选股票生成一份中文日报，覆盖价格变化、关键驱动和重要新闻。
 
-如果 `instructions/us_stocks_watchlist_default.txt` 为空，说明这是一份可复用模板版本，默认不内置任何个人观察名单；此时应优先使用用户显式提供的股票列表。
+如果用户没有显式提供股票列表，默认读取 `instructions/us_stocks_watchlist_default.txt`。公开版本默认内置 Mag 7：AAPL、MSFT、NVDA、AMZN、GOOGL、META、TSLA。
+
+如果本地默认名单意外为空，不要把美股模块空着；先使用 Mag 7 作为默认观察名单，并提示用户之后可以改成自己的自选股。
 
 ## 必带字段
 
