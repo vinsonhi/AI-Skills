@@ -43,6 +43,8 @@ Thumbs.db
 *.json
 reports/
 test_results/
+instructions/local_user_preferences.md
+instructions/.local_onboarding_state.json
 
 # Playwright / Testing
 playwright-report/

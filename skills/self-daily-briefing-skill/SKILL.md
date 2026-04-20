@@ -64,6 +64,29 @@ python3 /Users/bytedance/.codex/skills/.system/skill-installer/scripts/install-s
 
 安装后重启 Codex。
 
+### 首次安装 onboarding
+
+只在首次安装后的第一次使用时做 onboarding。后续生成日报时不要重复询问；只有当用户明确说“重新设置日报偏好”“修改语言/股票/关注主题”时才重新进入设置流程。
+
+执行前先检查本地状态文件：`instructions/.local_onboarding_state.json`。如果 `onboardingComplete: true`，直接进入用户要的日报任务。
+
+首次 onboarding 按 4 步走：
+
+1. **自我介绍**：说明这个 skill 会生成综合、财经、科技、AI 深度和美股自选 Morning Brief。
+2. **语言偏好**：询问中文、英文或双语；默认中文，并保留关键英文产品名、论文名和公司名。
+3. **股票跟踪偏好和额外关注**：询问美股 ticker 列表，以及用户想长期关注的公司、产品、人物或主题。如果用户说没有，告诉用户以后随时能补充；不要自行猜测默认股票。
+4. **展示信息源并询问是否运行一遍**：展示 X builders、播客、官方博客等默认源，问用户是否现在先跑一版看效果。
+
+如果用户给出 ticker 列表，把列表写入**本地已安装 skill** 的 `instructions/us_stocks_watchlist_default.txt`，一行一个 ticker；公开仓库版本默认保持为空，不提交个人观察名单。
+
+可复用脚本：
+
+```bash
+python3 scripts/onboarding.py
+python3 scripts/onboarding.py --language zh --watchlist "NVDA, AMD, MSFT" --interests "Claude Code, AI 搜索, 机器人"
+python3 scripts/onboarding.py --force
+```
+
 ## 可用日报
 
 ### 1. 综合早报
@@ -97,8 +120,9 @@ python3 /Users/bytedance/.codex/skills/.system/skill-installer/scripts/install-s
 - 适用场景：要看前沿论文和 AI 行业观点
 - 信息源：
   - Hugging Face Papers
-  - X Following AI（登录个人 X 账号后抓取已关注博主热帖）
-  - X Recommended AI（登录个人 X 账号后抓取推荐流热帖）
+  - X Fixed AI Builders（登录个人 X 账号后抓取固定 builder 账号列表的今日热帖）
+  - AI Podcasts（6 档顶级 AI 播客，默认 14 天窗口）
+  - AI Official Blogs（AI 公司官方博客）
   - ChinAI
   - Ben's Bites
   - One Useful Thing
@@ -107,18 +131,18 @@ python3 /Users/bytedance/.codex/skills/.system/skill-installer/scripts/install-s
 
 #### AI 深度日报里的 X 板块规则
 
-- X 不是匿名抓公开搜索，而是复用用户登录后的个人时间线。
+- X 不是匿名抓公开搜索，也不再依赖 `Following` 或 `For you` 推荐流，而是复用用户登录态打开固定 builder 账号列表逐个查看。
+- 固定账号列表见 `instructions/x_ai_accounts.txt`，按 `follow-builders` 的 builder 取向维护，关注真实做产品、做研究、经营公司的人，而不是泛搬运账号。
 - 对这类登录态来源，默认先复用**用户自己正在使用的本机 Google Chrome 会话**，不要先启动沙箱里的临时浏览器、匿名 profile、或无状态 Playwright context。
 - 可接受的“复用个人 Chrome”方式包括：
   - 直接连接 / 驱动用户本机已开启的 Chrome；
   - 直接读取用户本机 Chrome profile / cookie jar 来复用现有登录态；
   - 在同一台机器上用系统 Chrome 打开目标页面并沿用该用户 profile。
 - 不要把“沙箱浏览器没登录”误判成“用户 X 登录态失效”。只有当用户本机 Chrome 自身的会话也无效时，才允许标记为登录态失效。
-- 必须同时看两路：
-  - `Following`
-  - `Recommended / For you`
+- 必须逐个检查固定列表中的账号主页；不要用推荐流替代固定列表，也不要只看用户自己的关注流。
 - 数据窗口默认只看最近 24 小时。
 - 热度排序不能只看点赞，要综合 replies / reposts / likes / views / bookmarks。
+- 跨账号排序时优先选择“最近 24 小时 + 明确 AI/模型/产品/研究/产业信号 + 高互动”的内容；账号身份只能作为背景，不能替代事实来源。
 - 如果推文里带外链，优先打开外链正文再写 `Summary` 和 `Deep Dive`，不要只复述发帖文案。
 - 如果没有外链，再基于推文本身做摘要和解读。
 - 最终输出仍要遵守日报格式：`Source`、`Time`、`Summary`、`Deep Dive`。
@@ -128,6 +152,14 @@ python3 /Users/bytedance/.codex/skills/.system/skill-installer/scripts/install-s
 - 只有在用户本机 Chrome 的真实会话也失效时，才允许明确标记为“登录态失效”，并停在可恢复步骤上。
 - 登录失效时，不能私自改用匿名抓取、公开搜索、替代站点、或完全不同的技术路线来冒充同一数据源。
 
+#### AI 播客和官方博客规则
+
+- 播客列表见 `instructions/ai_podcasts.txt`，默认包含 Latent Space、Training Data、No Priors、Unsupervised Learning、The MAD Podcast with Matt Turck、AI & I by Every。
+- 播客默认窗口是最近 14 天；播客不是日更源，不能套 24 小时硬过滤，也不要因为当天没有新节目就写大段缺口。
+- 播客摘要应先给一句 `The Takeaway`，再说明嘉宾是谁、为什么值得关注，并优先提炼反直觉、具体经验、产品判断和研究路线判断。
+- 官方博客列表见 `instructions/ai_official_blogs.txt`，默认包含 Anthropic Engineering 和 Claude Blog。
+- 官方博客摘要要优先写清核心公告、产品能力、研究发现、API/能力变化、关键数字或 benchmark；没有原文链接的内容不要写入日报。
+
 #### 本机 Chrome 执行约定
 
 - 默认 Chrome 路径：`/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`
@@ -136,7 +168,7 @@ python3 /Users/bytedance/.codex/skills/.system/skill-installer/scripts/install-s
 - 可复用脚本：
   - `scripts/real_chrome_helpers.py`
   - `scripts/check_x_personal_chrome_session.py`
-  - `scripts/extract_x_timeline_with_personal_chrome.py`
+  - `scripts/extract_x_accounts_with_personal_chrome.py`
   - `scripts/export_pdf_with_system_chrome.sh`
   - `scripts/filter_recent_brief_items.py`
 - 使用上述脚本后，若本轮任务额外拉起了 Chrome headless、本地 HTTP server、Playwright MCP、或其他浏览器自动化辅助进程，结束前必须再次检查并关闭它们。

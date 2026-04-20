@@ -1,0 +1,4 @@
+# AI official blogs for company/product/research updates.
+# Format: name<TAB>index_url<TAB>focus
+Anthropic Engineering	https://www.anthropic.com/engineering	technical deep dives from the Anthropic team
+Claude Blog	https://claude.com/blog	Claude product announcements and updates

@@ -1,0 +1,28 @@
+# Fixed X accounts for AI daily tracking.
+# Source baseline: follow-builders default builders list.
+# Format: handle<TAB>identity
+@karpathy	Andrej Karpathy, AI researcher and educator
+@swyx	Swyx, AI engineer and Latent Space co-host
+@joshwoodward	Josh Woodward, AI product builder
+@kevinweil	Kevin Weil, AI product and company builder
+@petergyang	Peter Yang, product leader and AI writer
+@thenanyu	Nan Yu, AI product builder
+@realmadhuguru	Madhu Guru, AI builder
+@AmandaAskell	Amanda Askell, AI safety and research leader
+@_catwu	Cat Wu, AI researcher / builder
+@trq212	Thariq, AI builder
+@GoogleLabs	Google Labs official account
+@amasad	Amjad Masad, Replit CEO
+@rauchg	Guillermo Rauch, Vercel CEO
+@alexalbert__	Alex Albert, Claude / Anthropic developer relations
+@levie	Aaron Levie, Box CEO
+@ryolu_	Ryo Lu, AI product designer / builder
+@garrytan	Garry Tan, Y Combinator CEO
+@mattturck	Matt Turck, FirstMark partner and MAD Podcast host
+@zarazhangrui	Zara Zhang, AI builder and writer
+@nikunj	Nikunj Kothari, AI builder
+@steipete	Peter Steinberger, developer tools builder
+@danshipper	Dan Shipper, Every CEO and AI writer
+@adityaag	Aditya Agarwal, product and startup builder
+@sama	Sam Altman, OpenAI CEO
+@claudeai	Claude official account

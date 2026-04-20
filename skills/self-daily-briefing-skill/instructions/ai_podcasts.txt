@@ -1,0 +1,9 @@
+# AI podcasts for long-form AI signal tracking.
+# Default window: 14 days, because podcasts are usually weekly or biweekly.
+# Format: name<TAB>rss_url<TAB>homepage_or_youtube_url
+Latent Space	https://pod2txt.vercel.app/api/feed?url=https://api.substack.com/feed/podcast/1084089.rss	https://www.youtube.com/@LatentSpacePod
+Training Data	https://feeds.megaphone.fm/trainingdata	https://www.youtube.com/playlist?list=PLOhHNjZItNnMm5tdW61JpnyxeYH5NDDx8
+No Priors	https://feeds.megaphone.fm/nopriors	https://www.youtube.com/@NoPriorsPodcast
+Unsupervised Learning	https://feeds.simplecast.com/dOSE_bdP	https://www.youtube.com/@RedpointAI
+The MAD Podcast with Matt Turck	https://anchor.fm/s/f2ee4948/podcast/rss	https://www.youtube.com/@DataDrivenNYC/videos
+AI & I by Every	https://anchor.fm/s/ed1f5584/podcast/rss	https://www.youtube.com/playlist?list=PLuMcoKK9mKgHtW_o9h5sGO2vXrffKHwJL
