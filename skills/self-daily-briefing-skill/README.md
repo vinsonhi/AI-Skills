@@ -25,7 +25,7 @@ python3 /Users/bytedance/.codex/skills/.system/skill-installer/scripts/install-s
 - 科技早报：AI、开发者工具、创业产品
 - AI 深度日报：论文、AI builders、播客、官方博客、newsletter
 - 美股股票早报：自选股票价格、涨跌、重要新闻和一句话判断
-- 合并版日报：把上面几个板块合成一份可读的 Markdown 和 PDF
+- 标准日报：默认完整日报，包含综合、财经、科技、AI 深度和美股自选；如果只想看细节，也可以单独点某个模块
 
 默认会保存到 `reports/YYYY-MM-DD/`，并优先输出 Markdown；需要阅读版时再导出 PDF。
 
@@ -47,7 +47,7 @@ onboarding 会问四件事：
 常用说法：
 
 ```text
-如意如意
+牛马牛马
 ```
 
 会展示日报菜单。
@@ -58,7 +58,7 @@ onboarding 会问四件事：
 帮我生成今天的综合早报
 帮我生成今天的 AI 深度日报
 帮我生成美股股票早报
-帮我生成今天的合并版日报
+帮我生成今天的标准日报
 重新设置日报偏好
 ```
 
@@ -153,14 +153,16 @@ reports/YYYY-MM-DD/ai_daily_report.md
 reports/YYYY-MM-DD/us_stocks_report.md
 ```
 
-合并版默认输出：
+标准日报默认输出完整日报：
 
 ```text
 reports/YYYY-MM-DD/merged_daily_report.md
 reports/YYYY-MM-DD/merged_daily_report.pdf
 ```
 
-合并版会按这个顺序：
+> 说明：文件名继续沿用 `merged_daily_report`，只是为了兼容已有脚本和历史产物；对用户来说这就是默认的标准日报。
+
+标准日报会按这个顺序：
 
 1. 综合早报
 2. 财经早报
@@ -168,7 +170,7 @@ reports/YYYY-MM-DD/merged_daily_report.pdf
 4. AI 深度日报
 5. 美股股票早报
 
-如果某个板块当天已经生成过，合并时优先复用原文件，不为了统一文风重新改写。
+如果某个板块当天已经生成过，生成标准日报时优先复用原文件，不为了统一文风重新改写。
 
 ## 质量规则
 

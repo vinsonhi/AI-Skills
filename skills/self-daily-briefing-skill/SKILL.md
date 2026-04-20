@@ -1,6 +1,6 @@
 ---
 name: self-daily-briefing-skill
-description: "自用日报 skill。用于生成综合早报、财经早报、科技早报、AI 深度日报，以及美股自选股票早报。用户说“如意如意”、'早报'、'美股股票早报'、'股票日报' 时使用。"
+description: "自用日报 skill。用于生成综合早报、财经早报、科技早报、AI 深度日报，以及美股自选股票早报。用户说“牛马牛马”、'早报'、'美股股票早报'、'股票日报' 时使用。"
 ---
 
 # 自用日报 skill
@@ -9,14 +9,15 @@ description: "自用日报 skill。用于生成综合早报、财经早报、科
 
 ## 严格规则
 
-- 如果用户要的是“合并版日报”或要求把综合/财经/科技/AI 深度/美股放进同一个文件，必须先生成或读取各板块源文件，再做合并。
-- 合并时，`general_report.md`、`finance_report.md`、`tech_report.md`、`ai_daily_report.md` 这四个板块把源文件内容视为最终内容，直接拼接，不要二次改写、二次摘要、重写观点。
-- 合并展示时，为避免双层标题重复，保留合并稿里的外层章节标题，去掉各源文件自身的首个 `# 标题` 行后再拼接正文。
-- 合并稿的章节标题应保留视觉识别，推荐使用带 emoji 的外层标题，例如 `🌅 一、综合早报`、`💰 二、财经早报`。
-- 标题层级应保持一致：合并稿主标题用 `#`，五个外层章节用 `##`，章节内部的小分组和“数据缺口”统一用 `###`。
-- 合并稿主标题后不要先放元信息列表；开头必须直接进入 `## 🌅 一、综合早报`。
+- 如果用户要的是“标准日报”，默认生成包含综合/财经/科技/AI 深度/美股的完整日报；如果用户只要某个模块，再单独生成对应模块。
+- 生成标准日报前，必须先生成或读取各板块源文件，再按固定顺序组装。
+- 生成标准日报时，`general_report.md`、`finance_report.md`、`tech_report.md`、`ai_daily_report.md` 这四个板块把源文件内容视为最终内容，直接拼接，不要二次改写、二次摘要、重写观点。
+- 标准日报展示时，为避免双层标题重复，保留标准日报稿里的外层章节标题，去掉各源文件自身的首个 `# 标题` 行后再拼接正文。
+- 标准日报稿的章节标题应保留视觉识别，推荐使用带 emoji 的外层标题，例如 `🌅 一、综合早报`、`💰 二、财经早报`。
+- 标题层级应保持一致：标准日报稿主标题用 `#`，五个外层章节用 `##`，章节内部的小分组和“数据缺口”统一用 `###`。
+- 标准日报稿主标题后不要先放元信息列表；开头必须直接进入 `## 🌅 一、综合早报`。
 - 生成时间、数据窗口、合并来源、说明等元信息统一放到全文末尾，并用 Markdown 引用块表示。
-- 合并稿允许新增的内容只有：
+- 标准日报稿允许新增的内容只有：
   - 顶部总标题；
   - 文末引用式元信息块（生成时间、数据窗口、合并来源、说明）；
   - 板块分隔符；
@@ -210,7 +211,7 @@ python3 scripts/onboarding.py --force
 
 说明里要给出最终 Markdown 的样子，不只讲规则。每个日报板块至少放 1-2 个条目示例，最后用 `...省略` 表示完整报告会更长。
 
-### 合并版日报示例约束
+### 标准日报示例约束
 
 ```markdown
 # Morning Brief | 2026-03-11
@@ -373,7 +374,7 @@ python3 scripts/daily_briefing.py --profile ai_daily
   - `reports/YYYY-MM-DD/ai_daily_report.md`
   - 如用户要求便于阅读的导出，再额外输出同名 `.pdf`
 
-## 合并版日报工作流
+## 标准日报工作流
 
 1. 先确认是否已有以下源文件：
    - `reports/YYYY-MM-DD/general_report.md`
@@ -382,7 +383,7 @@ python3 scripts/daily_briefing.py --profile ai_daily
    - `reports/YYYY-MM-DD/ai_daily_report.md`
 2. 如果不存在，就先按对应 profile 生成。
 2.1 对 raw items 先执行近 24 小时过滤；可复用 `scripts/filter_recent_brief_items.py` 对候选条目做时效与近 3 天去重检查。
-3. 合并时按以下顺序直接拼接：
+3. 生成标准日报时按以下顺序组装：
    - 综合早报
    - 财经早报
    - 科技早报
@@ -390,9 +391,10 @@ python3 scripts/daily_briefing.py --profile ai_daily
    - 美股股票早报
 4. 对前四个板块，直接贴源文件原文，不改写。
 5. 美股板块单独生成；如果用户提供了更完整的版本，用用户版本覆盖。
-6. 最终合并稿默认同时输出两份：
+6. 最终标准日报稿默认同时输出两份：
    - `reports/YYYY-MM-DD/merged_daily_report.md`
    - `reports/YYYY-MM-DD/merged_daily_report.pdf`
+   - 文件名沿用 `merged_daily_report` 是为了兼容既有脚本；对用户展示时称为“标准日报”。
 6.1 PDF 导出默认复用 `scripts/export_pdf_with_system_chrome.sh`：先把 HTML 通过 localhost 暴露，再让系统 Chrome 打印，禁止回退到 `file:// + print-to-pdf`。
 7. 如果用户指定路径，则在用户路径下保存同名 `.md` 和 `.pdf`。
 
@@ -448,4 +450,4 @@ python3 scripts/daily_briefing.py --profile ai_daily
 
 ## 交互菜单
 
-用户说“如意如意”时，读取 `templates.md` 并展示菜单。
+用户说“牛马牛马”时，读取 `templates.md` 并展示菜单。
