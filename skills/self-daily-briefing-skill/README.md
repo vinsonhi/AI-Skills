@@ -24,6 +24,8 @@
 
 最终交付一份 PDF。你只需要打开读，不需要在一堆中间文件里找结果。
 
+![Morning Brief 预览](assets/morning-brief-preview.svg)
+
 ## 快速开始
 
 1. 在你的 AI Agent 中安装这个 skill。
@@ -79,8 +81,6 @@ Hacker News、GitHub Trending、Product Hunt、36Kr、微博、华尔街见闻�
 - 6 档 AI 播客：Latent Space、Training Data、No Priors、Unsupervised Learning、The MAD Podcast with Matt Turck、AI & I by Every
 - AI 公司官方博客：Anthropic Engineering、Claude Blog
 - ChinAI、Ben's Bites、One Useful Thing、Memia、Interconnects
-
-X/Twitter 不依赖 `For you` 或 `Following` 推荐流，而是按固定 builder 列表看关键观点、产品发布、技术讨论和行业判断。
 
 ### 美股
 
