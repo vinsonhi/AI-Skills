@@ -1,15 +1,16 @@
-# AI-Skills
+# AI Skills
 
-个人正在使用的 AI Skills 集合。
+一组可以直接安装到 AI Agent 里的实用 skills。
+
+每个 skill 都有独立 README，点进去可以看到一句话安装、使用方式和输出示例。
 
 ## Skills
 
-- [`frontend-skill`](./skills/frontend-skill/README.md)
-  用于做视觉要求高的落地页、网站、应用界面、原型和 demo，强调画面主视觉、信息层级、节制排版和有目的的动效，而不是通用组件堆砌。
-- [`xiaohongshu-research`](./skills/xiaohongshu-research/README.md)
-  使用已登录账号的小红书做研究，结合正文、评论、图片、视频和作者主页来汇总真实用户反馈，并过滤高风险营销内容。
-- [`bilibili-video-reader`](./skills/bilibili-video-reader/README.md)
-  读取 B 站视频的真实内容，总结视频输出的核心观点和关键帧
 - [`self-daily-briefing-skill`](./skills/self-daily-briefing-skill/README.md)
-  自用日报 skill，支持综合早报、财经早报、科技早报、AI 深度日报，以及美股自选股票早报。
-
+  不刷信息流，也能跟上今天。把综合新闻、财经市场、科技产品、AI 行业动态和美股观察名单整理成一份 PDF 早报。
+- [`frontend-skill`](./skills/frontend-skill/README.md)
+  做视觉要求高的落地页、网站、应用界面、原型和 demo，强调主视觉、信息层级、节制排版和有目的的动效。
+- [`xiaohongshu-research`](./skills/xiaohongshu-research/README.md)
+  用已登录的小红书做真实用户研究，结合正文、评论、图片、视频和作者主页汇总反馈，并过滤高风险营销内容。
+- [`bilibili-video-reader`](./skills/bilibili-video-reader/README.md)
+  真正读取 B 站视频内容：下载音频、本地转写，再基于 transcript 总结核心观点。
