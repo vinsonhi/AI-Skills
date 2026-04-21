@@ -1,4 +1,4 @@
-# 中文 Morning Brief Skill
+# 不刷信息流，也能跟上今天
 
 一句话安装：
 
@@ -10,7 +10,7 @@
 
 如果不支持自动安装，可以下载本目录，并放到你的 Agent 指定的 skills 目录；安装后刷新或重启 Agent，让它重新索引 skills。
 
-一个给 AI Agent 使用的中文日报 skill。每天帮你把综合新闻、财经市场、科技产品、AI 行业动态和美股观察名单整理成一份可以直接阅读的 Morning Brief。
+一个给 AI Agent 使用的中文 Morning Brief skill，把综合新闻、财经市场、科技产品、AI 行业动态和美股观察名单整理成一份 PDF 早报。
 
 ## 你会得到什么
 
@@ -22,7 +22,7 @@
 - AI 深度日报：论文、AI builders、播客、官方博客、newsletter
 - 美股股票早报：自选股价格、涨跌原因、重要新闻和一句话判断
 
-最终交付一份 PDF。你只需要打开读，不需要在一堆中间文件里找结果。
+每天给你一份排好版的 PDF 早报，打开就能快速进入今天的重点。
 
 <img src="assets/morning-brief-preview.svg" alt="Morning Brief 预览" width="520">
 
