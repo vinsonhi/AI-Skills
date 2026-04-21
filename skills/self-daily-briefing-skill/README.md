@@ -10,7 +10,7 @@
 
 如果不支持自动安装，可以下载本目录，并放到你的 Agent 指定的 skills 目录；安装后刷新或重启 Agent，让它重新索引 skills。
 
-一个给 AI Agent 使用的中文 Morning Brief skill，把综合新闻、财经市场、科技产品、AI 行业动态和美股观察名单整理成一份 PDF 早报。
+一个给 AI Agent 使用的中文 Morning Brief skill，把综合新闻、财经市场、科技产品、AI 行业动态和美股观察名单整理成一份可直接阅读的日报。
 
 ## 你会得到什么
 
@@ -22,7 +22,7 @@
 - AI 深度日报：论文、AI builders、播客、官方博客、newsletter
 - 美股股票早报：自选股价格、涨跌原因、重要新闻和一句话判断
 
-每天给你一份排好版的 PDF 早报，打开就能快速进入今天的重点。
+默认直接在对话里给你一份排好版的日报；如果你需要，也可以让它导出成 PDF、Markdown 或其他格式。
 
 <img src="assets/morning-brief-preview.svg" alt="Morning Brief 预览" width="520">
 
@@ -94,10 +94,19 @@ AAPL, MSFT, NVDA, AMZN, GOOGL, META, TSLA
 
 ## 输出
 
-默认输出：
+默认直接在对话里输出日报内容，像这样：
 
 ```text
-reports/YYYY-MM-DD/morning_brief_YYYY-MM-DD.pdf
+Morning Brief | 2026-04-21
+
+## 🌅 一、综合早报
+...
+
+## 💰 二、财经早报
+...
+
+## 🧠 四、AI 深度日报
+...
 ```
 
 标准日报会按这个顺序组织：
@@ -108,7 +117,13 @@ reports/YYYY-MM-DD/morning_brief_YYYY-MM-DD.pdf
 4. AI 深度日报
 5. 美股股票早报
 
-如果你只点某个模块，也会输出对应模块的 PDF。
+如果你只点某个模块，也会直接输出对应模块。需要文件时，可以明确说：
+
+```text
+导出成 PDF
+保存一份 Markdown
+同时给我对话版和 PDF
+```
 
 ## 质量规则
 

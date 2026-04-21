@@ -5,7 +5,7 @@ description: "中文 Morning Brief skill。用于生成综合早报、财经早�
 
 # 中文 Morning Brief skill
 
-用于生成中文日报。默认最终只交付 PDF；Markdown、HTML、JSON、快照等都只是过程文件，除非用户明确要求，否则不要作为最终产物展示。
+用于生成中文日报。默认直接在对话中输出日报内容；只有用户明确要求 PDF、Markdown、HTML、保存文件或其他格式时，才导出对应文件。
 
 ## 严格规则
 
@@ -13,10 +13,10 @@ description: "中文 Morning Brief skill。用于生成综合早报、财经早�
 - 首次 onboarding 完成后再继续用户的原始任务。如果用户只是说“牛马牛马”，onboarding 后展示菜单；如果用户是第一次直接要求生成日报，onboarding 后继续生成对应日报。
 - 后续使用时不要重复 onboarding；只有用户明确说“重新设置日报偏好”“修改语言/股票/关注主题”时才重新进入设置流程。
 - 如果用户没有指定日报类型，默认生成“标准日报”。
-- 默认最终产物只有一个 PDF：`reports/YYYY-MM-DD/morning_brief_YYYY-MM-DD.pdf`。如果用户指定单模块日报，最终也只交付该模块 PDF。
-- Markdown、HTML、JSON、raw data、校验快照、临时图片都属于过程文件；可以临时创建用于组装、校验和导出 PDF，但 PDF 验收通过后必须删除或留在临时目录，不要展示给用户。
-- 只有用户明确要求 Markdown、HTML、原始数据或过程文件时，才保留并交付这些额外文件。
-- 如果 PDF 导出失败，不要把 Markdown/HTML/低保真 PDF 冒充最终产物；明确说明 PDF 被阻塞，并保留最少必要诊断信息。
+- 默认输出渠道是当前对话：直接给出完整日报正文，不保存文件，不让用户跳转找文件。
+- 如果用户没有指定日报类型，默认生成“标准日报”并直接在对话里输出。
+- 只有用户明确要求 PDF、Markdown、HTML、保存文件、原始数据或过程文件时，才生成并交付对应文件。
+- 如果用户要求 PDF，使用本文的 PDF 导出规则；PDF 导出失败时，不要把 Markdown/HTML/低保真 PDF 冒充最终产物，必须明确说明 PDF 被阻塞。
 - 如果用户要的是“标准日报”，默认生成包含综合/财经/科技/AI 深度/美股的完整日报；如果用户只要某个模块，再单独生成对应模块。
 - 生成标准日报前，必须先生成或读取各板块源文件，再按固定顺序组装。
 - 生成标准日报时，`general_report.md`、`finance_report.md`、`tech_report.md`、`ai_daily_report.md` 这四个板块把源文件内容视为最终内容，直接拼接，不要二次改写、二次摘要、重写观点。
@@ -359,18 +359,19 @@ python3 scripts/onboarding.py --force
 ...省略
 ```
 
-## 最终交付规则
+## 输出规则
 
-- 默认最终文件名：`reports/YYYY-MM-DD/morning_brief_YYYY-MM-DD.pdf`。
-- 单模块日报最终文件名建议使用：
+- 默认在当前对话直接输出日报正文，格式参考 `follow-builders`：标题、分组、条目摘要、来源链接和必要的判断，用户不用跳转文件。
+- 如果用户要求 Markdown，可以在对话中输出 Markdown，或按用户指定路径保存 `.md`。
+- 如果用户要求 PDF，建议文件名：
+  - `reports/YYYY-MM-DD/morning_brief_YYYY-MM-DD.pdf`
   - `reports/YYYY-MM-DD/general_report_YYYY-MM-DD.pdf`
   - `reports/YYYY-MM-DD/finance_report_YYYY-MM-DD.pdf`
   - `reports/YYYY-MM-DD/tech_report_YYYY-MM-DD.pdf`
   - `reports/YYYY-MM-DD/ai_daily_report_YYYY-MM-DD.pdf`
   - `reports/YYYY-MM-DD/us_stocks_report_YYYY-MM-DD.pdf`
-- `*.md`、`*.html`、`*.json`、`*.png`、`*_snapshot.*` 都视为过程文件；默认不要交付。
-- 成功导出并验收 PDF 后，删除本轮生成的过程文件。不要删除用户历史报告、用户手动指定保留的文件、onboarding 状态或偏好文件。
-- 最终回复只给 PDF 路径和必要的一句话说明；不要列出过程文件。
+- `*.html`、`*.json`、`*.png`、`*_snapshot.*` 默认都视为过程文件；除非用户明确要求，不要交付。
+- 如果用户要求文件导出，最终回复给文件路径和必要说明；不要列出无关过程文件。
 
 ## 新闻日报工作流
 
@@ -388,17 +389,17 @@ python3 scripts/daily_briefing.py --profile ai_daily --no-save
 - 必带字段：标题、时间、摘要、Deep Dive
 - 不编造新闻，不补不存在的数据
 - 对综合 / 财经 / 科技 / AI 深度板块，先经过 `最近 24 小时` 过滤，再做近 3 天成稿去重；过不了这两道门槛的条目不能进入最终稿。
-- 按对应 instructions 生成临时 Markdown，再导出对应 PDF。
-- Markdown 只作为 PDF 导出的中间稿；PDF 验收通过后默认删除。
+- 默认直接按对应 instructions 在对话里生成日报正文。
+- 只有用户要求 PDF 或保存文件时，才生成临时 Markdown/HTML 并走导出流程。
 
 ## 标准日报工作流
 
-1. 先确认本轮是否已有以下临时源稿：
+1. 先确认本轮是否已有以下源稿内容：
    - `reports/YYYY-MM-DD/general_report.md`
    - `reports/YYYY-MM-DD/finance_report.md`
    - `reports/YYYY-MM-DD/tech_report.md`
    - `reports/YYYY-MM-DD/ai_daily_report.md`
-2. 如果不存在，就先按对应 profile 生成临时源稿。
+2. 如果不存在，就先按对应 profile 生成源稿内容。
 2.1 对 raw items 先执行近 24 小时过滤；可复用 `scripts/filter_recent_brief_items.py` 对候选条目做时效与近 3 天去重检查。
 3. 生成标准日报时按以下顺序组装：
    - 综合早报
@@ -408,11 +409,9 @@ python3 scripts/daily_briefing.py --profile ai_daily --no-save
    - 美股股票早报
 4. 对前四个板块，直接贴源文件原文，不改写。
 5. 美股板块单独生成；如果用户提供了更完整的版本，用用户版本覆盖。
-6. 最终标准日报默认只输出一份 PDF：
-   - `reports/YYYY-MM-DD/morning_brief_YYYY-MM-DD.pdf`
-   - 如果旧脚本仍生成 `merged_daily_report.md`、`merged_daily_report.html` 或其他中间文件，PDF 验收通过后删除它们；对用户展示时称为“标准日报”。
-6.1 PDF 导出默认走“HTML 阅读页 -> 可用浏览器打印 PDF”：可以复用 `scripts/export_pdf_with_system_chrome.sh`，也可以使用运行环境提供的等价浏览器打印能力；禁止回退到会截断长文的 `file:// + print-to-pdf`。
-7. 如果用户指定路径，则把最终 PDF 保存到用户路径；不要额外保存 `.md`，除非用户明确要求。
+6. 默认直接在对话中输出标准日报。
+6.1 如果用户要求 PDF，走“Markdown -> HTML 阅读页 -> 可用浏览器打印 PDF”：可以复用 `scripts/export_pdf_with_system_chrome.sh`，也可以使用运行环境提供的等价浏览器打印能力；禁止回退到会截断长文的 `file:// + print-to-pdf`。
+7. 如果用户指定路径或格式，则按用户要求保存；不要额外保存无关格式，除非用户明确要求。
 
 ## 美股股票早报工作流
 
@@ -441,8 +440,8 @@ python3 scripts/daily_briefing.py --profile ai_daily --no-save
    - 关键因素
    - 重要新闻链接
    - 一句话判断
-7. 生成临时 Markdown 后导出 `reports/YYYY-MM-DD/us_stocks_report_YYYY-MM-DD.pdf`
-8. PDF 验收通过后删除本轮临时 Markdown、HTML、JSON、快照文件；除非用户明确要求保留。
+7. 默认直接在对话中输出美股股票早报。
+8. 如果用户要求 PDF，生成临时 Markdown 后导出 `reports/YYYY-MM-DD/us_stocks_report_YYYY-MM-DD.pdf`，并按 PDF 规则验收。
 
 ### 美股股票早报模板
 
