@@ -1,9 +1,9 @@
 ---
 name: self-daily-briefing-skill
-description: "自用日报 skill。用于生成综合早报、财经早报、科技早报、AI 深度日报，以及美股自选股票早报。用户说“牛马牛马”、'早报'、'美股股票早报'、'股票日报' 时使用。"
+description: "中文 Morning Brief skill。用于生成综合早报、财经早报、科技早报、AI 深度日报，以及美股自选股票早报。用户说“牛马牛马”、'早报'、'美股股票早报'、'股票日报' 时使用。"
 ---
 
-# 自用日报 skill
+# 中文 Morning Brief skill
 
 用于生成中文日报。默认先保存到 `reports/YYYY-MM-DD/`，并同时输出 Markdown 与便于阅读的 PDF。
 
@@ -33,13 +33,13 @@ description: "自用日报 skill。用于生成综合早报、财经早报、科
 - 每个板块不要求凑固定条数；宁可直接写 `### 📌 数据缺口`，也不要回填 24 小时窗口之外的旧稿。
 - PDF 要尽量保留 Markdown 原始阅读结构，优先走“Markdown -> HTML 阅读页 -> 浏览器导出 PDF”，不要自创杂志式重排。
 - HTML 导出 PDF 的正确链路固定为：`Markdown -> 完整 HTML 文件 -> 浏览器直接打开该 HTML 页面 -> 浏览器打印 PDF`。
-- 对本机运行环境，PDF 默认优先使用用户机器上已安装、正在使用的 **系统 Google Chrome** 直接打印；不要先走沙箱里的临时 Chromium / Playwright profile，再把失败结果误判成“浏览器不可用”。
-- 如果系统 Chrome 可用，优先复用它来打开本地 HTML 并导出 PDF；只有在系统 Chrome 本身不可用时，才允许把 PDF 标记为“被阻塞”。
+- PDF 导出优先使用当前 Agent 环境可用的浏览器打印能力，例如系统浏览器、Agent 提供的浏览器工具、Chromium 或 Chrome；不要在浏览器链路实际可用时误判为“浏览器不可用”。
+- 如果没有可用浏览器打印链路，才允许把 PDF 标记为“被阻塞”。
 - 禁止把整篇 HTML 用 `data:` URL 注入浏览器后再打印长文 PDF；这条链路会发生静默截断，导致后半篇缺页。
 - 禁止把 `reportlab` 当作 HTML/Markdown 阅读页的默认 PDF 导出器；它只能用于程序化排版文档，不能保证与 HTML 阅读结构一致。
 - 如果浏览器直打链路不可用，应明确报错说明卡点，并把 PDF 状态标记为“未完成 / 被阻塞”；不要静默切换到低保真方案后继续交付。
 - 对 Morning Brief 这类要求 HTML 保真的交付，`reportlab` fallback 不算成功交付，只能算失败占位。
-- 任何日报流程如果启动了 `http.server`、系统 Chrome headless、Playwright、MCP、或其他临时后台进程，交付前必须主动做收尾，确保这些进程在任务结束后退出；不能把清理动作留给下次重启。
+- 任何日报流程如果启动了 `http.server`、headless browser、Playwright、MCP、或其他临时后台进程，交付前必须主动做收尾，确保这些进程在任务结束后退出；不能把清理动作留给下次重启。
 - PDF 导出完成后，必须核对 HTML 和 PDF 内容是否完整一致，至少完成以下检查：
   - `pdfinfo` 检查页数是否与内容规模相符，不能异常偏少。
   - `pdftotext` 提取 PDF 尾部文本，并与 HTML 尾部文本逐段对比，确保最后一个板块完整出现。
@@ -59,11 +59,7 @@ description: "自用日报 skill。用于生成综合早报、财经早报、科
 
 如果对方支持 GitHub 仓库路径安装，通常这句话就够了。
 
-```bash
-python3 /Users/bytedance/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py --repo vinsonhi/AI-Skills --path skills/self-daily-briefing-skill
-```
-
-安装后重启 Codex。
+如果运行环境不支持自动安装，可以下载本目录，并放到对应 Agent 的 skills 目录；安装后刷新或重启 Agent，让它重新索引 skills。
 
 ### 首次安装 onboarding
 
@@ -134,12 +130,13 @@ python3 scripts/onboarding.py --force
 
 - X 不是匿名抓公开搜索，也不再依赖 `Following` 或 `For you` 推荐流，而是复用用户登录态打开固定 builder 账号列表逐个查看。
 - 固定账号列表见 `instructions/x_ai_accounts.txt`，按 `follow-builders` 的 builder 取向维护，关注真实做产品、做研究、经营公司的人，而不是泛搬运账号。
-- 对这类登录态来源，默认先复用**用户自己正在使用的本机 Google Chrome 会话**，不要先启动沙箱里的临时浏览器、匿名 profile、或无状态 Playwright context。
-- 可接受的“复用个人 Chrome”方式包括：
-  - 直接连接 / 驱动用户本机已开启的 Chrome；
-  - 直接读取用户本机 Chrome profile / cookie jar 来复用现有登录态；
-  - 在同一台机器上用系统 Chrome 打开目标页面并沿用该用户 profile。
-- 不要把“沙箱浏览器没登录”误判成“用户 X 登录态失效”。只有当用户本机 Chrome 自身的会话也无效时，才允许标记为登录态失效。
+- 对这类登录态来源，默认先复用用户已经登录 X 的浏览器会话或运行环境提供的等价登录态，不要直接用匿名搜索、推荐流、无状态浏览器替代固定账号列表。
+- 可接受的登录态方式包括：
+  - Agent 提供的已登录浏览器会话；
+  - 用户授权的浏览器 profile / cookie bridge；
+  - 用户在当前浏览器自动化环境中手动登录后的会话；
+  - 其他能稳定访问固定账号主页的等价机制。
+- 不要把“某个隔离浏览器没登录”误判成“用户 X 登录态失效”。只有确认当前可用登录态都无法访问 X 后，才允许标记为登录态失效。
 - 必须逐个检查固定列表中的账号主页；不要用推荐流替代固定列表，也不要只看用户自己的关注流。
 - 数据窗口默认只看最近 24 小时。
 - 热度排序不能只看点赞，要综合 replies / reposts / likes / views / bookmarks。
@@ -149,8 +146,8 @@ python3 scripts/onboarding.py --force
 - 最终输出仍要遵守日报格式：`Source`、`Time`、`Summary`、`Deep Dive`。
 - 缺正文就写缺口，不要把猜测当事实。
 - 如果 X 或其他需要登录的来源出现登录过期、登录页、扫码、验证码、或权限校验，不能把它当作普通“数据缺口”直接跳过。
-- 在判定“登录态失效”之前，必须先验证用户本机 Chrome 的真实会话；如果只是沙箱浏览器、临时 profile、或隔离 Playwright context 没有登录，不算用户登录态失效。
-- 只有在用户本机 Chrome 的真实会话也失效时，才允许明确标记为“登录态失效”，并停在可恢复步骤上。
+- 在判定“登录态失效”之前，必须先验证当前运行环境可访问的真实登录态；如果只是临时 profile、隔离浏览器或无状态 context 没有登录，不算用户登录态失效。
+- 只有在可用登录态都失效时，才允许明确标记为“登录态失效”，并停在可恢复步骤上。
 - 登录失效时，不能私自改用匿名抓取、公开搜索、替代站点、或完全不同的技术路线来冒充同一数据源。
 
 #### AI 播客和官方博客规则
@@ -161,18 +158,18 @@ python3 scripts/onboarding.py --force
 - 官方博客列表见 `instructions/ai_official_blogs.txt`，默认包含 Anthropic Engineering 和 Claude Blog。
 - 官方博客摘要要优先写清核心公告、产品能力、研究发现、API/能力变化、关键数字或 benchmark；没有原文链接的内容不要写入日报。
 
-#### 本机 Chrome 执行约定
+#### 登录态浏览器执行约定
 
-- 默认 Chrome 路径：`/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`
-- 默认 profile 根目录：`~/Library/Application Support/Google/Chrome/`
-- 验证 X 会话时，优先检查本机 Chrome 里是否已有 `x.com` 的 `auth_token` 和 `ct0` 等登录 cookie，并以 `https://x.com/home` 的实际返回结果为准。
+- 验证 X 会话时，优先确认当前可用登录态是否能访问 `https://x.com/home` 和固定账号主页。
+- 如果运行环境支持读取浏览器 cookie，可检查 `x.com` 的 `auth_token`、`ct0` 等登录 cookie；如果不支持，应让用户在可用浏览器环境中完成登录。
 - 可复用脚本：
   - `scripts/real_chrome_helpers.py`
   - `scripts/check_x_personal_chrome_session.py`
   - `scripts/extract_x_accounts_with_personal_chrome.py`
   - `scripts/export_pdf_with_system_chrome.sh`
   - `scripts/filter_recent_brief_items.py`
-- 使用上述脚本后，若本轮任务额外拉起了 Chrome headless、本地 HTTP server、Playwright MCP、或其他浏览器自动化辅助进程，结束前必须再次检查并关闭它们。
+- 上述 Chrome helper 脚本是 macOS + Google Chrome 的参考实现；其他 Agent 或运行环境可以用等价浏览器会话、cookie bridge、浏览器 MCP 或人工登录流程替代。
+- 使用上述脚本或等价工具后，若本轮任务额外拉起了 headless browser、本地 HTTP server、Playwright MCP、或其他浏览器自动化辅助进程，结束前必须再次检查并关闭它们。
 
 ### 5. 美股股票早报
 - 适用场景：要看自选股票的最新价格、涨跌、驱动因素和重要新闻
@@ -395,7 +392,7 @@ python3 scripts/daily_briefing.py --profile ai_daily
    - `reports/YYYY-MM-DD/merged_daily_report.md`
    - `reports/YYYY-MM-DD/merged_daily_report.pdf`
    - 文件名沿用 `merged_daily_report` 是为了兼容既有脚本；对用户展示时称为“标准日报”。
-6.1 PDF 导出默认复用 `scripts/export_pdf_with_system_chrome.sh`：先把 HTML 通过 localhost 暴露，再让系统 Chrome 打印，禁止回退到 `file:// + print-to-pdf`。
+6.1 PDF 导出默认走“HTML 阅读页 -> 可用浏览器打印 PDF”：可以复用 `scripts/export_pdf_with_system_chrome.sh`，也可以使用运行环境提供的等价浏览器打印能力；禁止回退到会截断长文的 `file:// + print-to-pdf`。
 7. 如果用户指定路径，则在用户路径下保存同名 `.md` 和 `.pdf`。
 
 ## 美股股票早报工作流

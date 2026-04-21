@@ -1,4 +1,4 @@
-# 自用日报 Skill
+# 中文 Morning Brief Skill
 
 一句话安装：
 
@@ -6,19 +6,13 @@
 帮我安装这个 skill：https://github.com/vinsonhi/AI-Skills/tree/main/skills/self-daily-briefing-skill
 ```
 
-如果你的 Codex 支持从 GitHub 路径安装，直接说上面这句就够了。
+如果你的 AI Agent 支持从 GitHub 路径安装 skill，直接使用上面这句即可。
 
-手动安装命令：
-
-```bash
-python3 /Users/bytedance/.codex/skills/.system/skill-installer/scripts/install-skill-from-github.py --repo vinsonhi/AI-Skills --path skills/self-daily-briefing-skill
-```
-
-安装后重启 Codex。
+如果不支持自动安装，可以下载本目录，并放到你的 Agent 指定的 skills 目录；安装后刷新或重启 Agent，让它重新索引 skills。
 
 ## 你会得到什么
 
-这是一个给个人使用的中文 Morning Brief skill。你可以让 Codex 帮你生成：
+这是一个通用的中文 Morning Brief skill。你可以让支持 skills 的 AI Agent 帮你生成：
 
 - 综合早报：科技、创投、社交、财经大盘动态
 - 财经早报：宏观、市场、板块、加密和关键驱动
@@ -31,7 +25,7 @@ python3 /Users/bytedance/.codex/skills/.system/skill-installer/scripts/install-s
 
 ## 第一次使用
 
-第一次安装后，Codex 会先帮你设置一次日报偏好。以后正常生成日报不会重复问，除非你明确说“重新设置日报偏好”。
+第一次安装后，Agent 会先帮你设置一次日报偏好。以后正常生成日报不会重复问，除非你明确说“重新设置日报偏好”。
 
 onboarding 会问四件事：
 
@@ -191,7 +185,7 @@ reports/YYYY-MM-DD/merged_daily_report.pdf
 AAPL, MSFT, NVDA, AMZN, GOOGL, META, TSLA
 ```
 
-第一次 onboarding 时，如果你给了 ticker，Codex 会记在本地：
+第一次 onboarding 时，如果你给了 ticker，Agent 会记在本地已安装的 skill 目录：
 
 ```text
 instructions/us_stocks_watchlist_default.txt
@@ -208,10 +202,10 @@ instructions/us_stocks_watchlist_default.txt
 PDF 会尽量保留 Markdown 的阅读结构。默认链路是：
 
 ```text
-Markdown -> HTML 阅读页 -> 系统 Chrome 打印 PDF
+Markdown -> HTML 阅读页 -> 可用浏览器打印 PDF
 ```
 
-如果 Chrome 或本地浏览器链路不可用，应该明确说明 PDF 被阻塞，而不是悄悄切到低保真导出。
+如果浏览器打印链路不可用，应该明确说明 PDF 被阻塞，而不是悄悄切到低保真导出。
 
 ## 示例
 
@@ -220,7 +214,7 @@ Markdown -> HTML 阅读页 -> 系统 Chrome 打印 PDF
 - `examples/merged_daily_report_2026-03-11.md`
 - `examples/merged_daily_report_2026-03-11.pdf`
 
-## 本地脚本
+## 辅助脚本
 
 onboarding：
 
@@ -236,6 +230,8 @@ python3 scripts/onboarding.py --language zh --watchlist "NVDA, AMD, MSFT" --inte
 python3 scripts/check_x_personal_chrome_session.py
 python3 scripts/extract_x_accounts_with_personal_chrome.py
 ```
+
+这两个脚本是 macOS + Google Chrome 的参考实现。其他 Agent 或运行环境可以使用等价的已登录浏览器会话、cookie bridge、浏览器 MCP 或人工登录流程，只要仍然按固定账号列表抓取即可。
 
 抓基础新闻源：
 

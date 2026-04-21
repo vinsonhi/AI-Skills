@@ -10,6 +10,7 @@ from zoneinfo import ZoneInfo
 
 
 SH_TZ = ZoneInfo("Asia/Shanghai")
+SKILL_ROOT = Path(__file__).resolve().parents[1]
 
 
 def normalize_title(title: str) -> str:
@@ -71,7 +72,7 @@ def main() -> int:
     parser.add_argument("--input-json", required=True)
     parser.add_argument("--section-suffix", required=True)
     parser.add_argument("--date", required=True)
-    parser.add_argument("--sections-dir", default="/Users/bytedance/个人/日报/sections")
+    parser.add_argument("--sections-dir", default=str(SKILL_ROOT / "reports" / "sections"))
     parser.add_argument("--lookback-days", type=int, default=3)
     parser.add_argument("--hours", type=int, default=24)
     args = parser.parse_args()

@@ -45,7 +45,7 @@
     ```
 
 ### Part 3: 🐦 X Fixed AI Builders
-*   **Data Source**: `instructions/x_ai_accounts.txt`, fetched with the user's local logged-in Chrome session.
+*   **Data Source**: `instructions/x_ai_accounts.txt`, fetched with an authenticated X browser session or an equivalent login-capable browser tool.
 *   **Default Accounts**: the 25-builder list in `instructions/x_ai_accounts.txt`, based on the follow-builders source baseline.
 *   **Focus**: model releases, research commentary, product launches, demos, developer tools, benchmarks, infrastructure, safety, and industry strategy.
 *   **Selection**: rank posts by recency, AI relevance, and combined engagement signals across replies / reposts / likes / views / bookmarks. Do not rank by likes alone.
