@@ -651,7 +651,7 @@ def main():
     parser.add_argument('--limit', type=int, default=10, help='Limit per source. Default 10')
     parser.add_argument('--keyword', help='Comma-sep keyword filter')
     parser.add_argument('--deep', action='store_true', help='Download article content for detailed summarization')
-    parser.add_argument('--save', action='store_true', help='Save output to reports directory (JSON + MD)')
+    parser.add_argument('--save', action='store_true', help='Save JSON process files to reports directory. Default is stdout only.')
     parser.add_argument('--no-save', action='store_true', dest='no_save', help='Skip saving JSON files to disk (only output to stdout)')
     parser.add_argument('--outdir', help='Custom output directory for saved reports')
     parser.add_argument('--list-sources', action='store_true', help='List all available source keys')
@@ -725,9 +725,8 @@ def main():
         
     print(json.dumps(results, indent=2, ensure_ascii=False))
     
-    # Save Report if requested or if running a single source (implicit convenience)
-    # Skip saving when --no-save is set (agent reads from stdout)
-    if not getattr(args, 'no_save', False) and (args.save or args.source != 'all'):
+    # Save only when explicitly requested. Default is stdout so agents do not leak process files.
+    if args.save and not getattr(args, 'no_save', False):
         if args.outdir:
             out_dir = args.outdir
         else:

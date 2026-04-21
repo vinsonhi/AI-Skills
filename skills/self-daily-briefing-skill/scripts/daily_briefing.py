@@ -10,6 +10,7 @@ from fetch_news import (
 )
 
 import argparse
+from pathlib import Path
 
 # --- Profile Configurations ---
 
@@ -198,8 +199,34 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--profile', default='general', choices=PROFILES.keys(), help='Briefing Profile')
     parser.add_argument('--outdir', help='Optional output directory for individual files')
-    parser.add_argument('--no-save', action='store_true', help='Skip saving JSON files to disk (only output to stdout)')
+    parser.add_argument('--save', action='store_true', help='Save JSON process files to disk. Default is stdout only.')
+    parser.add_argument('--no-save', action='store_true', help='Deprecated alias; JSON process files are not saved unless --save is set.')
+    parser.add_argument('--skip-onboarding-check', action='store_true', help='Internal/debug use only: run without checking onboarding state.')
     args = parser.parse_args()
+
+    skill_root = Path(__file__).resolve().parents[1]
+    state_paths = [
+        skill_root / "instructions" / "local_onboarding_state.json",
+        skill_root / "instructions" / ".local_onboarding_state.json",
+    ]
+    if not args.skip_onboarding_check:
+        onboarding_ok = False
+        for state_path in state_paths:
+            if not state_path.exists():
+                continue
+            try:
+                onboarding_ok = bool(json.loads(state_path.read_text(encoding="utf-8")).get("onboardingComplete"))
+            except json.JSONDecodeError:
+                onboarding_ok = False
+            if onboarding_ok:
+                break
+        if not onboarding_ok:
+            print(
+                "Onboarding has not been completed. Run `python3 scripts/onboarding.py` first, "
+                "or use `python3 scripts/onboarding.py --accept-defaults` to accept default settings.",
+                file=sys.stderr,
+            )
+            raise SystemExit(2)
     
     config = PROFILES.get(args.profile, PROFILES['general'])
     
@@ -225,7 +252,7 @@ def main():
     # Output result to stdout (for agent to read)
     print(json.dumps(final_data, indent=2, ensure_ascii=False))
     
-    if not args.no_save:
+    if args.save and not args.no_save:
         # Save Unified JSON
         unified_path = os.path.join(out_dir, f"{args.profile}_briefing_unified.json")
         with open(unified_path, 'w', encoding='utf-8') as f:
@@ -235,7 +262,7 @@ def main():
         sources_saved = save_individual_sources(final_data, out_dir)
         print(f"Saved unified report and {len(sources_saved)} individual source files to {out_dir}", file=sys.stderr)
     else:
-        print(f"JSON output sent to stdout only (--no-save mode)", file=sys.stderr)
+        print(f"JSON output sent to stdout only; process files were not saved", file=sys.stderr)
 
 if __name__ == "__main__":
     main()

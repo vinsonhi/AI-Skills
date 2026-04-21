@@ -21,11 +21,13 @@
 - 美股股票早报：自选股票价格、涨跌、重要新闻和一句话判断
 - 标准日报：默认完整日报，包含综合、财经、科技、AI 深度和美股自选；如果只想看细节，也可以单独点某个模块
 
-默认会保存到 `reports/YYYY-MM-DD/`，并优先输出 Markdown；需要阅读版时再导出 PDF。
+默认最终只交付 PDF。生成过程里可能临时使用 Markdown、HTML 或 JSON，但这些都只是工作文件，不应该作为最终产物展示给用户。
 
 ## 第一次使用
 
-第一次安装后，Agent 会先帮你设置一次日报偏好。以后正常生成日报不会重复问，除非你明确说“重新设置日报偏好”。
+第一次安装后，Agent 第一次使用这个 skill 时，必须先帮你设置一次日报偏好。以后正常生成日报不会重复问，除非你明确说“重新设置日报偏好”。
+
+如果第一次使用时你直接说“生成日报”或“牛马牛马”，也应该先完成 onboarding，再继续日报任务。
 
 onboarding 会问四件事：
 
@@ -45,6 +47,8 @@ onboarding 会问四件事：
 ```
 
 会展示日报菜单。
+
+如果你没有指定日报类型，默认生成“标准日报”。
 
 也可以直接说：
 
@@ -135,26 +139,20 @@ AI 深度日报会跟踪一组固定 builders，不再依赖个人关注流或 X
 
 这部分主要看产品能力变化、工程实践、API 更新、研究发现和 benchmark。没有原文链接的内容不会写进日报。
 
-## 输出格式
+## 最终产物
 
-单个板块会输出成独立文件：
-
-```text
-reports/YYYY-MM-DD/general_report.md
-reports/YYYY-MM-DD/finance_report.md
-reports/YYYY-MM-DD/tech_report.md
-reports/YYYY-MM-DD/ai_daily_report.md
-reports/YYYY-MM-DD/us_stocks_report.md
-```
-
-标准日报默认输出完整日报：
+默认最终只交付一个 PDF：
 
 ```text
-reports/YYYY-MM-DD/merged_daily_report.md
-reports/YYYY-MM-DD/merged_daily_report.pdf
+reports/YYYY-MM-DD/morning_brief_YYYY-MM-DD.pdf
 ```
 
-> 说明：文件名继续沿用 `merged_daily_report`，只是为了兼容已有脚本和历史产物；对用户来说这就是默认的标准日报。
+规则：
+
+- 用户没有特别要求时，生成“标准日报”，最终只交付这一个 PDF。
+- 用户指定某个单独模块，例如“AI 深度日报”或“美股股票早报”，也只交付对应 PDF。
+- Markdown、HTML、JSON、原始抓取结果、校验快照都属于过程文件；可以临时创建，但成功导出并验收 PDF 后要删除或放入临时目录，不要展示给用户。
+- 只有用户明确要求“给我 Markdown / 保留原始数据 / 保留过程文件”时，才额外交付这些文件。
 
 标准日报会按这个顺序：
 
@@ -164,7 +162,7 @@ reports/YYYY-MM-DD/merged_daily_report.pdf
 4. AI 深度日报
 5. 美股股票早报
 
-如果某个板块当天已经生成过，生成标准日报时优先复用原文件，不为了统一文风重新改写。
+如果某个板块当天已经生成过，生成标准日报时可以临时复用原文件内容，不为了统一文风重新改写；最终仍只交付标准日报 PDF。
 
 ## 质量规则
 
@@ -221,8 +219,11 @@ onboarding：
 ```bash
 python3 scripts/onboarding.py
 python3 scripts/onboarding.py --force
+python3 scripts/onboarding.py --accept-defaults
 python3 scripts/onboarding.py --language zh --watchlist "NVDA, AMD, MSFT" --interests "Claude Code, AI 搜索, 机器人"
 ```
+
+非交互环境里，不要只打印 onboarding 就标记完成；需要用户回复偏好，或显式使用 `--accept-defaults`。
 
 抓固定 X builders：
 
@@ -236,8 +237,8 @@ python3 scripts/extract_x_accounts_with_personal_chrome.py
 抓基础新闻源：
 
 ```bash
-python3 scripts/daily_briefing.py --profile general
-python3 scripts/daily_briefing.py --profile finance
-python3 scripts/daily_briefing.py --profile tech
-python3 scripts/daily_briefing.py --profile ai_daily
+python3 scripts/daily_briefing.py --profile general --no-save
+python3 scripts/daily_briefing.py --profile finance --no-save
+python3 scripts/daily_briefing.py --profile tech --no-save
+python3 scripts/daily_briefing.py --profile ai_daily --no-save
 ```

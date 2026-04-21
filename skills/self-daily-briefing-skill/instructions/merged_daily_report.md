@@ -2,7 +2,7 @@
 
 ## 目标
 
-生成默认完整 Morning Brief：包含综合早报、财经早报、科技早报、AI 深度日报、美股股票早报，并同时导出一份便于阅读的 PDF。
+生成默认完整 Morning Brief：包含综合早报、财经早报、科技早报、AI 深度日报、美股股票早报，最终只交付一份便于阅读的 PDF。
 
 ## 严格规则
 
@@ -11,7 +11,7 @@
 3. 不要对前四个板块做二次摘要、改写或统一文风。
 4. 如果用户给了某个板块的完整内容，按用户版本原文覆盖。
 5. 如果缺少某个源文件或当天数据不足，明确写“数据缺口”，不要编造。
-6. 最终默认交付 `.md` 和 `.pdf` 两份。
+6. 最终默认只交付 `.pdf` 一份；`.md`、`.html`、`.json` 和快照文件都只是过程文件。
 7. PDF 要保留 Markdown 的原始阅读结构和链接，优先用 HTML 阅读页导出，不要重新设计版式。
 8. HTML 导出 PDF 时，浏览器必须直接打开完整 HTML 页面，例如本地 HTTP 地址或可直接访问的 HTML 文件页面；不要把完整 HTML 通过 `data:` URL 塞给浏览器。
 9. 不允许把 `reportlab` 作为“HTML 保真导出”的 fallback。它只能用于明确接受重排的程序化 PDF，不适用于 Morning Brief 这类阅读页保真输出。
@@ -26,7 +26,7 @@
 
 Morning Brief 的 PDF 交付前，必须完成下面的固定流程：
 
-1. 先生成完整 Markdown。
+1. 先生成完整临时 Markdown。
 2. 再渲染成完整 HTML 阅读页，并把 HTML 单独落盘。
 3. 让浏览器直接打开该 HTML 页面后打印 PDF。
 4. 导出后执行 `pdfinfo`，确认页数没有异常偏少。
@@ -34,7 +34,7 @@ Morning Brief 的 PDF 交付前，必须完成下面的固定流程：
 6. 用 `pdftoppm -png` 渲染最后 1-2 页，人工确认没有空白、截断、缺页或停在中间章节。
 
 只要 HTML 和 PDF 尾部不一致，就必须视为导出失败，重导，不得交付。
-如果浏览器打印根本跑不通，就交付 Markdown/HTML 并明确说明 PDF 阻塞原因；不得把 `reportlab` 或其他重排版导出物当作“已完成 PDF”。
+如果浏览器打印根本跑不通，明确说明 PDF 阻塞原因；不得把 Markdown/HTML、`reportlab` 或其他重排版导出物当作“已完成 PDF”。只有用户明确接受时，才可以额外交付 Markdown/HTML。
 
 ## 推荐顺序
 
@@ -55,5 +55,10 @@ Morning Brief 的 PDF 交付前，必须完成下面的固定流程：
 
 - 如果用户指定路径，保存到用户路径。
 - 如果用户未指定，保存到以下兼容路径：
-  - `reports/YYYY-MM-DD/merged_daily_report.md`
-  - `reports/YYYY-MM-DD/merged_daily_report.pdf`
+  - `reports/YYYY-MM-DD/morning_brief_YYYY-MM-DD.pdf`
+
+## 过程文件清理
+
+- 允许在同一日期目录或临时目录中创建 Markdown、HTML、JSON、PNG、快照文件。
+- PDF 验收通过后，删除本轮生成的过程文件。
+- 不要删除用户明确要求保留的文件、历史报告、onboarding 状态或偏好文件。

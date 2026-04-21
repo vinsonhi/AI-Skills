@@ -5,10 +5,18 @@ description: "中文 Morning Brief skill。用于生成综合早报、财经早�
 
 # 中文 Morning Brief skill
 
-用于生成中文日报。默认先保存到 `reports/YYYY-MM-DD/`，并同时输出 Markdown 与便于阅读的 PDF。
+用于生成中文日报。默认最终只交付 PDF；Markdown、HTML、JSON、快照等都只是过程文件，除非用户明确要求，否则不要作为最终产物展示。
 
 ## 严格规则
 
+- 使用本 skill 的任何功能前，先检查 `instructions/local_onboarding_state.json`。如果文件不存在、解析失败、或 `onboardingComplete` 不是 `true`，必须先运行完整 onboarding；不要直接生成日报，也不要只展示菜单后跳过 onboarding。兼容旧安装中的 `instructions/.local_onboarding_state.json`，但新写入统一使用非隐藏文件。
+- 首次 onboarding 完成后再继续用户的原始任务。如果用户只是说“牛马牛马”，onboarding 后展示菜单；如果用户是第一次直接要求生成日报，onboarding 后继续生成对应日报。
+- 后续使用时不要重复 onboarding；只有用户明确说“重新设置日报偏好”“修改语言/股票/关注主题”时才重新进入设置流程。
+- 如果用户没有指定日报类型，默认生成“标准日报”。
+- 默认最终产物只有一个 PDF：`reports/YYYY-MM-DD/morning_brief_YYYY-MM-DD.pdf`。如果用户指定单模块日报，最终也只交付该模块 PDF。
+- Markdown、HTML、JSON、raw data、校验快照、临时图片都属于过程文件；可以临时创建用于组装、校验和导出 PDF，但 PDF 验收通过后必须删除或留在临时目录，不要展示给用户。
+- 只有用户明确要求 Markdown、HTML、原始数据或过程文件时，才保留并交付这些额外文件。
+- 如果 PDF 导出失败，不要把 Markdown/HTML/低保真 PDF 冒充最终产物；明确说明 PDF 被阻塞，并保留最少必要诊断信息。
 - 如果用户要的是“标准日报”，默认生成包含综合/财经/科技/AI 深度/美股的完整日报；如果用户只要某个模块，再单独生成对应模块。
 - 生成标准日报前，必须先生成或读取各板块源文件，再按固定顺序组装。
 - 生成标准日报时，`general_report.md`、`finance_report.md`、`tech_report.md`、`ai_daily_report.md` 这四个板块把源文件内容视为最终内容，直接拼接，不要二次改写、二次摘要、重写观点。
@@ -65,7 +73,7 @@ description: "中文 Morning Brief skill。用于生成综合早报、财经早�
 
 只在首次安装后的第一次使用时做 onboarding。后续生成日报时不要重复询问；只有当用户明确说“重新设置日报偏好”“修改语言/股票/关注主题”时才重新进入设置流程。
 
-执行前先检查本地状态文件：`instructions/.local_onboarding_state.json`。如果 `onboardingComplete: true`，直接进入用户要的日报任务。
+执行任何菜单或日报任务前，先检查本地状态文件：`instructions/local_onboarding_state.json`。如果 `onboardingComplete: true`，直接进入用户要的日报任务；否则必须先完成 onboarding。旧版本隐藏状态文件 `instructions/.local_onboarding_state.json` 只作为兼容读取。
 
 首次 onboarding 按 4 步走：
 
@@ -81,8 +89,11 @@ description: "中文 Morning Brief skill。用于生成综合早报、财经早�
 ```bash
 python3 scripts/onboarding.py
 python3 scripts/onboarding.py --language zh --watchlist "NVDA, AMD, MSFT" --interests "Claude Code, AI 搜索, 机器人"
+python3 scripts/onboarding.py --accept-defaults
 python3 scripts/onboarding.py --force
 ```
+
+非交互环境中，如果没有拿到用户偏好，不要把 onboarding 标记为完成；应先把四步问题展示给用户。只有用户回答，或用户/调用方明确接受默认设置时，才写入完成状态。
 
 ## 可用日报
 
@@ -348,15 +359,28 @@ python3 scripts/onboarding.py --force
 ...省略
 ```
 
+## 最终交付规则
+
+- 默认最终文件名：`reports/YYYY-MM-DD/morning_brief_YYYY-MM-DD.pdf`。
+- 单模块日报最终文件名建议使用：
+  - `reports/YYYY-MM-DD/general_report_YYYY-MM-DD.pdf`
+  - `reports/YYYY-MM-DD/finance_report_YYYY-MM-DD.pdf`
+  - `reports/YYYY-MM-DD/tech_report_YYYY-MM-DD.pdf`
+  - `reports/YYYY-MM-DD/ai_daily_report_YYYY-MM-DD.pdf`
+  - `reports/YYYY-MM-DD/us_stocks_report_YYYY-MM-DD.pdf`
+- `*.md`、`*.html`、`*.json`、`*.png`、`*_snapshot.*` 都视为过程文件；默认不要交付。
+- 成功导出并验收 PDF 后，删除本轮生成的过程文件。不要删除用户历史报告、用户手动指定保留的文件、onboarding 状态或偏好文件。
+- 最终回复只给 PDF 路径和必要的一句话说明；不要列出过程文件。
+
 ## 新闻日报工作流
 
 ### 数据抓取
 
 ```bash
-python3 scripts/daily_briefing.py --profile general
-python3 scripts/daily_briefing.py --profile finance
-python3 scripts/daily_briefing.py --profile tech
-python3 scripts/daily_briefing.py --profile ai_daily
+python3 scripts/daily_briefing.py --profile general --no-save
+python3 scripts/daily_briefing.py --profile finance --no-save
+python3 scripts/daily_briefing.py --profile tech --no-save
+python3 scripts/daily_briefing.py --profile ai_daily --no-save
 ```
 
 ### 输出要求
@@ -364,21 +388,17 @@ python3 scripts/daily_briefing.py --profile ai_daily
 - 必带字段：标题、时间、摘要、Deep Dive
 - 不编造新闻，不补不存在的数据
 - 对综合 / 财经 / 科技 / AI 深度板块，先经过 `最近 24 小时` 过滤，再做近 3 天成稿去重；过不了这两道门槛的条目不能进入最终稿。
-- 保存路径：
-  - `reports/YYYY-MM-DD/general_report.md`
-  - `reports/YYYY-MM-DD/finance_report.md`
-  - `reports/YYYY-MM-DD/tech_report.md`
-  - `reports/YYYY-MM-DD/ai_daily_report.md`
-  - 如用户要求便于阅读的导出，再额外输出同名 `.pdf`
+- 按对应 instructions 生成临时 Markdown，再导出对应 PDF。
+- Markdown 只作为 PDF 导出的中间稿；PDF 验收通过后默认删除。
 
 ## 标准日报工作流
 
-1. 先确认是否已有以下源文件：
+1. 先确认本轮是否已有以下临时源稿：
    - `reports/YYYY-MM-DD/general_report.md`
    - `reports/YYYY-MM-DD/finance_report.md`
    - `reports/YYYY-MM-DD/tech_report.md`
    - `reports/YYYY-MM-DD/ai_daily_report.md`
-2. 如果不存在，就先按对应 profile 生成。
+2. 如果不存在，就先按对应 profile 生成临时源稿。
 2.1 对 raw items 先执行近 24 小时过滤；可复用 `scripts/filter_recent_brief_items.py` 对候选条目做时效与近 3 天去重检查。
 3. 生成标准日报时按以下顺序组装：
    - 综合早报
@@ -388,18 +408,17 @@ python3 scripts/daily_briefing.py --profile ai_daily
    - 美股股票早报
 4. 对前四个板块，直接贴源文件原文，不改写。
 5. 美股板块单独生成；如果用户提供了更完整的版本，用用户版本覆盖。
-6. 最终标准日报稿默认同时输出两份：
-   - `reports/YYYY-MM-DD/merged_daily_report.md`
-   - `reports/YYYY-MM-DD/merged_daily_report.pdf`
-   - 文件名沿用 `merged_daily_report` 是为了兼容既有脚本；对用户展示时称为“标准日报”。
+6. 最终标准日报默认只输出一份 PDF：
+   - `reports/YYYY-MM-DD/morning_brief_YYYY-MM-DD.pdf`
+   - 如果旧脚本仍生成 `merged_daily_report.md`、`merged_daily_report.html` 或其他中间文件，PDF 验收通过后删除它们；对用户展示时称为“标准日报”。
 6.1 PDF 导出默认走“HTML 阅读页 -> 可用浏览器打印 PDF”：可以复用 `scripts/export_pdf_with_system_chrome.sh`，也可以使用运行环境提供的等价浏览器打印能力；禁止回退到会截断长文的 `file:// + print-to-pdf`。
-7. 如果用户指定路径，则在用户路径下保存同名 `.md` 和 `.pdf`。
+7. 如果用户指定路径，则把最终 PDF 保存到用户路径；不要额外保存 `.md`，除非用户明确要求。
 
 ## 美股股票早报工作流
 
 1. 读取用户给的股票列表；如果没给，就用默认观察名单。
 2. 用一次 `web.finance` 调用获取所有股票的最新价格和昨收，锁定为同一轮行情快照。
-2.1 立刻把原始快照落盘，并运行 `scripts/validate_us_stocks_snapshot.py`：
+2.1 立刻把原始快照写入临时文件，并运行 `scripts/validate_us_stocks_snapshot.py`：
    - 校验观察名单是否齐全；
    - 校验关键数字字段是否完整；
    - 校验时间戳是否保持同轮口径；
@@ -422,8 +441,8 @@ python3 scripts/daily_briefing.py --profile ai_daily
    - 关键因素
    - 重要新闻链接
    - 一句话判断
-7. 保存到 `reports/YYYY-MM-DD/us_stocks_report.md`
-8. 如用户要求便于阅读的导出，再额外输出 `reports/YYYY-MM-DD/us_stocks_report.pdf`
+7. 生成临时 Markdown 后导出 `reports/YYYY-MM-DD/us_stocks_report_YYYY-MM-DD.pdf`
+8. PDF 验收通过后删除本轮临时 Markdown、HTML、JSON、快照文件；除非用户明确要求保留。
 
 ### 美股股票早报模板
 
@@ -447,4 +466,4 @@ python3 scripts/daily_briefing.py --profile ai_daily
 
 ## 交互菜单
 
-用户说“牛马牛马”时，读取 `templates.md` 并展示菜单。
+用户说“牛马牛马”时，先执行 onboarding 状态检查；如果首次未完成，先完成 onboarding，再读取 `templates.md` 并展示菜单。

@@ -11,7 +11,8 @@ from pathlib import Path
 SKILL_ROOT = Path(__file__).resolve().parents[1]
 WATCHLIST_PATH = SKILL_ROOT / "instructions" / "us_stocks_watchlist_default.txt"
 PREFERENCES_PATH = SKILL_ROOT / "instructions" / "local_user_preferences.md"
-ONBOARDING_STATE_PATH = SKILL_ROOT / "instructions" / ".local_onboarding_state.json"
+ONBOARDING_STATE_PATH = SKILL_ROOT / "instructions" / "local_onboarding_state.json"
+LEGACY_ONBOARDING_STATE_PATH = SKILL_ROOT / "instructions" / ".local_onboarding_state.json"
 X_ACCOUNTS_PATH = SKILL_ROOT / "instructions" / "x_ai_accounts.txt"
 PODCASTS_PATH = SKILL_ROOT / "instructions" / "ai_podcasts.txt"
 BLOGS_PATH = SKILL_ROOT / "instructions" / "ai_official_blogs.txt"
@@ -83,10 +84,11 @@ def write_preferences(*, language: str | None, interests: str | None) -> None:
 
 
 def onboarding_complete() -> bool:
-    if not ONBOARDING_STATE_PATH.exists():
+    state_path = ONBOARDING_STATE_PATH if ONBOARDING_STATE_PATH.exists() else LEGACY_ONBOARDING_STATE_PATH
+    if not state_path.exists():
         return False
     try:
-        state = json.loads(ONBOARDING_STATE_PATH.read_text(encoding="utf-8"))
+        state = json.loads(state_path.read_text(encoding="utf-8"))
     except json.JSONDecodeError:
         return False
     return bool(state.get("onboardingComplete"))
@@ -120,6 +122,11 @@ def main() -> int:
         "--dry-run",
         action="store_true",
         help="Print the onboarding prompt without writing files.",
+    )
+    parser.add_argument(
+        "--accept-defaults",
+        action="store_true",
+        help="Complete onboarding with default language and Mag 7 watchlist when no custom answers are provided.",
     )
     parser.add_argument(
         "--force",
@@ -164,11 +171,41 @@ def main() -> int:
     if args.dry_run:
         return 0
 
+    interactive = sys.stdin.isatty()
+    if interactive:
+        if args.language is None:
+            language_raw = input("语言偏好（中文/英文/双语，直接回车默认中文）：").strip().lower()
+            language_map = {
+                "": "zh",
+                "中文": "zh",
+                "zh": "zh",
+                "英文": "en",
+                "english": "en",
+                "en": "en",
+                "双语": "bilingual",
+                "bilingual": "bilingual",
+            }
+            args.language = language_map.get(language_raw, "zh")
+        if args.watchlist is None and not custom_watchlist:
+            args.watchlist = input("美股 ticker（逗号分隔；没有就回车，默认 Mag 7）：").strip()
+        if args.interests is None:
+            args.interests = input("额外关注的信息（没有就回车跳过）：").strip()
+
     write_preferences(language=args.language, interests=args.interests)
 
+    watchlist_arg_provided = args.watchlist is not None
     raw = args.watchlist
-    if raw is None and not sys.stdin.isatty():
-        raw = sys.stdin.read().strip()
+    # Do not implicitly read stdin in non-interactive agent runs. Some agents keep
+    # stdin open, which can make onboarding hang even when flags were provided.
+    if (
+        raw is None
+        and not interactive
+        and not args.accept_defaults
+        and args.language is None
+        and args.interests is None
+    ):
+        print("onboarding 需要用户确认偏好；请让用户回答语言、股票名单和额外关注信息，或用 --accept-defaults 接受默认设置。", file=sys.stderr)
+        return 2
     if raw:
         tickers = normalize_tickers(raw)
         if tickers:
@@ -182,7 +219,7 @@ def main() -> int:
                 print(", ".join(DEFAULT_WATCHLIST))
             else:
                 print("未更新股票名单；继续使用你本地已有的观察名单。")
-    elif not existing_watchlist:
+    elif not existing_watchlist or args.accept_defaults or watchlist_arg_provided:
         write_watchlist(DEFAULT_WATCHLIST)
         print("已先使用 Mag 7 作为默认美股观察名单：")
         print(", ".join(DEFAULT_WATCHLIST))
