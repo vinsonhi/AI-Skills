@@ -24,7 +24,7 @@
 
 最终交付一份 PDF。你只需要打开读，不需要在一堆中间文件里找结果。
 
-![Morning Brief 预览](assets/morning-brief-preview.svg)
+<img src="assets/morning-brief-preview.svg" alt="Morning Brief 预览" width="520">
 
 ## 快速开始
 

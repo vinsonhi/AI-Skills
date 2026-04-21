@@ -1,43 +1,40 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="760" viewBox="0 0 1100 760" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="480" viewBox="0 0 760 480" role="img" aria-labelledby="title desc">
   <title id="title">Morning Brief preview</title>
   <desc id="desc">A preview of the generated Morning Brief PDF with a title, section heading, and several summarized news items.</desc>
-  <rect width="1100" height="760" fill="#ffffff"/>
+  <rect width="760" height="480" fill="#ffffff"/>
   <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, 'Noto Sans CJK SC', sans-serif" fill="#24272c">
-    <text x="80" y="82" font-size="42" font-weight="800" letter-spacing="1">Morning Brief | 2026-04-20</text>
-    <line x1="80" y1="135" x2="1010" y2="135" stroke="#dedede" stroke-width="2"/>
-    <text x="80" y="188" font-size="31" font-weight="800">🌅 一、综合早报</text>
-    <line x1="80" y1="246" x2="1010" y2="246" stroke="#e5e5e5" stroke-width="2"/>
+    <text x="52" y="58" font-size="30" font-weight="800" letter-spacing="1">Morning Brief | 2026-04-20</text>
+    <line x1="52" y1="92" x2="700" y2="92" stroke="#dedede" stroke-width="1.5"/>
+    <text x="52" y="130" font-size="23" font-weight="800">🌅 一、综合早报</text>
+    <line x1="52" y1="168" x2="700" y2="168" stroke="#e5e5e5" stroke-width="1.5"/>
 
-    <text x="80" y="302" font-size="31" font-weight="800">全网速览</text>
+    <text x="52" y="205" font-size="23" font-weight="800">全网速览</text>
 
-    <text x="80" y="360" font-size="22" font-weight="800">1. </text>
-    <text x="105" y="360" font-size="22" font-weight="800" fill="#185abc">美伊谈判悬而未决，美股低开，油价涨幅收窄，黄金小幅走软</text>
-    <circle cx="91" cy="400" r="4" fill="#24272c"/>
-    <text x="110" y="407" font-size="20" font-weight="800">Source</text>
-    <text x="177" y="407" font-size="20">: Wall Street CN | </text>
-    <text x="350" y="407" font-size="20" font-weight="800">Time</text>
-    <text x="400" y="407" font-size="20">: 2026-04-20 21:45</text>
-    <circle cx="91" cy="433" r="4" fill="#24272c"/>
-    <text x="110" y="440" font-size="20" font-weight="800">Summary</text>
-    <text x="205" y="440" font-size="20">: 美伊临时停火与后续谈判仍未明朗，风险资产承压。</text>
-    <circle cx="91" cy="466" r="4" fill="#24272c"/>
-    <text x="110" y="473" font-size="20" font-weight="800">Deep Dive</text>
-    <text x="215" y="473" font-size="20">: 地缘事件继续主导定价，核心不是单次产涨跌，而是风险路径仍在牵动市场。</text>
+    <text x="52" y="246" font-size="17" font-weight="800">1. </text>
+    <text x="73" y="246" font-size="17" font-weight="800" fill="#185abc">美伊谈判悬而未决，美股低开，油价涨幅收窄，黄金小幅走软</text>
+    <circle cx="61" cy="274" r="3" fill="#24272c"/>
+    <text x="76" y="280" font-size="15" font-weight="800">Source</text>
+    <text x="127" y="280" font-size="15">: Wall Street CN | </text>
+    <text x="258" y="280" font-size="15" font-weight="800">Time</text>
+    <text x="297" y="280" font-size="15">: 2026-04-20 21:45</text>
+    <circle cx="61" cy="301" r="3" fill="#24272c"/>
+    <text x="76" y="307" font-size="15" font-weight="800">Summary</text>
+    <text x="147" y="307" font-size="15">: 美伊临时停火与后续谈判仍未明朗，风险资产承压。</text>
+    <circle cx="61" cy="328" r="3" fill="#24272c"/>
+    <text x="76" y="334" font-size="15" font-weight="800">Deep Dive</text>
+    <text x="157" y="334" font-size="15">: 地缘事件继续主导定价，风险路径仍在牵动市场。</text>
 
-    <text x="80" y="548" font-size="22" font-weight="800">2. </text>
-    <text x="105" y="548" font-size="22" font-weight="800" fill="#185abc">日本近海强震上调至 7.7 级</text>
-    <circle cx="91" cy="588" r="4" fill="#24272c"/>
-    <text x="110" y="595" font-size="20" font-weight="800">Source</text>
-    <text x="177" y="595" font-size="20">: Wall Street CN / USGS / Weibo | </text>
-    <text x="520" y="595" font-size="20" font-weight="800">Time</text>
-    <text x="570" y="595" font-size="20">: 2026-04-20 20:14</text>
-    <circle cx="91" cy="621" r="4" fill="#24272c"/>
-    <text x="110" y="628" font-size="20" font-weight="800">Summary</text>
-    <text x="205" y="628" font-size="20">: 日本近海地震成为中文社交平台热议事件。</text>
-    <circle cx="91" cy="654" r="4" fill="#24272c"/>
-    <text x="110" y="661" font-size="20" font-weight="800">Deep Dive</text>
-    <text x="215" y="661" font-size="20">: 影响需要从公共安全、能源、避险交易和交通信息继续跟踪。</text>
+    <text x="52" y="386" font-size="17" font-weight="800">2. </text>
+    <text x="73" y="386" font-size="17" font-weight="800" fill="#185abc">日本近海强震上调至 7.7 级</text>
+    <circle cx="61" cy="414" r="3" fill="#24272c"/>
+    <text x="76" y="420" font-size="15" font-weight="800">Source</text>
+    <text x="127" y="420" font-size="15">: Wall Street CN / USGS / Weibo | </text>
+    <text x="385" y="420" font-size="15" font-weight="800">Time</text>
+    <text x="424" y="420" font-size="15">: 2026-04-20 20:14</text>
+    <circle cx="61" cy="441" r="3" fill="#24272c"/>
+    <text x="76" y="447" font-size="15" font-weight="800">Summary</text>
+    <text x="147" y="447" font-size="15">: 日本近海地震成为中文社交平台热议事件。</text>
 
-    <rect x="72" y="718" width="956" height="1" fill="#eeeeee"/>
+    <rect x="52" y="466" width="648" height="1" fill="#eeeeee"/>
   </g>
 </svg>
