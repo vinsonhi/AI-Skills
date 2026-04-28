@@ -1,14 +1,14 @@
 # 原型输出skill
 
-一个用真实后台页面做高保真 HTML 原型的 skill。
-
-**理念：** 先读取现网页面的运行态 DOM、CSS 和组件结构，再基于现网组件做需求迭代。不要从截图或记忆里重画一个“像后台”的页面。
-
 ## 一句话安装
 
 ```text
 帮我安装这个 skill：https://github.com/vinsonhi/AI-Skills/tree/main/skills/prototype-output-skill
 ```
+
+一个用真实后台页面做高保真 HTML 原型的 skill。
+
+**理念：** 先读取现网页面的运行态 DOM、CSS 和组件结构，再基于现网组件做需求迭代。不要从截图或记忆里重画一个“像后台”的页面。
 
 ## 一句话使用
 
