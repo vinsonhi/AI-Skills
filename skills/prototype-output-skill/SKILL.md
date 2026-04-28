@@ -1,6 +1,6 @@
 ---
 name: prototype-output-skill
-description: Build or revise a high-fidelity HTML prototype by starting from a real backend/product page instead of redrawing from scratch. Use when the user provides an existing admin/internal page URL, an authenticated browser page, or a local HTML snapshot and wants Codex to capture the runtime DOM/CSS, preserve the live product shell and component language, apply requirement changes on top, desensitize data, and export a shareable standalone HTML prototype.
+description: Build or revise a high-fidelity HTML prototype by starting from a real backend/product page instead of redrawing from scratch. Use when the user provides an existing admin/internal page URL, an authenticated browser page, or a local HTML snapshot and wants the agent to capture the runtime DOM/CSS, preserve the live product shell and component language, apply requirement changes on top, desensitize data, and export a shareable standalone HTML prototype.
 ---
 
 # 原型输出 Skill
