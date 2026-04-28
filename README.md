@@ -14,3 +14,5 @@
   用已登录的小红书做真实用户研究，结合正文、评论、图片、视频和作者主页汇总反馈，并过滤高风险营销内容。
 - [`bilibili-video-reader`](./skills/bilibili-video-reader/README.md)
   真正读取 B 站视频内容：下载音频、本地转写，再基于 transcript 总结核心观点。
+- [`prototype-output-skill`](./skills/prototype-output-skill/README.md)
+  基于真实后台页面抓取运行态 DOM/CSS，沿用现网组件样式做高保真 HTML 原型迭代，并导出可分享的单文件原型。

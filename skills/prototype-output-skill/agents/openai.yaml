@@ -1,0 +1,4 @@
+interface:
+  display_name: "原型输出skill"
+  short_description: "基于真实后台页面抓取运行态 DOM/CSS，做高保真 HTML 原型迭代与分享导出"
+  default_prompt: "基于我给的后台页面，先读取真实运行态 DOM/CSS，再在现网组件样式上做需求迭代，输出可分享的高保真 HTML 原型。"
