@@ -45,6 +45,21 @@ Before modifying anything, capture:
 - current interactions: expand/collapse, drill-down, filters, date selectors, target setting, export, action buttons
 - real field names and current copy style
 
+## Component Fidelity Checklist
+
+Before drawing or coding new UI, inspect the live page for these concrete style facts:
+
+- global background color, page container width, card radius, shadows, and spacing
+- top banner/header height, logo area, user/account area, and top-level tabs
+- left sidebar width, active menu background, icons, collapse behavior, and section grouping
+- primary/secondary/tertiary button height, padding, color, hover state, and icon style
+- select, date picker, segmented control, tab, radio group, and toolbar styling
+- metric card typography, selected card border, comparison rows, arrows, and trend colors
+- chart height, legend style, gridline color, axis text, and empty/loading states
+- table header background, grouped-header borders, fixed columns, operation column, row hover, pagination
+
+If any of these are unknown, inspect DOM/CSS/computed styles again before implementing. A screenshot can help compare the result, but it is not a substitute for reading the runtime HTML and CSS.
+
 ## Edit by Evolution, Not Reinvention
 
 Default rule: preserve the live product language.
@@ -143,3 +158,18 @@ Open the final local HTML and verify:
 - Sharing a page snapshot without inlining dependencies caused missing styles and images.
 
 If any of these appear, go back to the live runtime DOM and patch from there.
+
+## Lessons From Prior Failures
+
+Explicitly avoid these mistakes:
+
+- Do not lose the live page shell. Missing top banner, top tabs, side navigation, footer, or current account area means the prototype is not based on the product page.
+- Do not approximate colors or icons from memory. Read CSS variables, class names, inline styles, icon SVGs, or existing icon components first.
+- Do not invent a new card/banner/button style when the live page already has the same component type.
+- Do not move controls to a visually convenient place if the live page already owns that workflow elsewhere.
+- Do not hide complex table columns with CSS when the table uses grouped headers or fixed action columns; update the table model or rebuild with matching semantics.
+- Do not let operation buttons overflow horizontally. Verify the action column width and sticky/fixed behavior after every table change.
+- Do not keep real data in the final prototype. Search the HTML source as well as the rendered UI.
+- Do not call a prototype shareable until external scripts, stylesheets, `base href`, authenticated image URLs, and broken images have been checked.
+
+When the first output looks unlike the live page, stop feature work and repair fidelity first.
