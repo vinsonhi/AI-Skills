@@ -9,6 +9,7 @@ import concurrent.futures
 import os
 from datetime import datetime
 import subprocess
+from urllib.parse import urljoin
 
 # Headers for scraping to avoid basic bot detection
 HEADERS = {
@@ -499,6 +500,15 @@ AI_NEWSLETTER_SOURCES = [
 
 # ... (rest of sources)
 
+OFFICIAL_BLOG_SOURCES = [
+    ("OpenAI Blog", "https://openai.com/blog", "https://openai.com/news/rss.xml"),
+    ("Anthropic Engineering", "https://www.anthropic.com/engineering", None),
+    ("Anthropic News", "https://www.anthropic.com/news", None),
+    ("Claude Blog", "https://claude.com/blog", None),
+    ("Google AI Blog", "https://blog.google/technology/ai", "https://blog.google/innovation-and-ai/technology/ai/rss/"),
+    ("Meta AI Blog", "https://ai.meta.com/blog/", None),
+]
+
 def fetch_rss_with_playwright(url, source_name, limit=5):
     """Fallback fetcher using Playwright to bypass Cloudflare"""
     try:
@@ -581,6 +591,60 @@ def fetch_podcasts(limit=5, keyword=None):
             all_items.extend(future.result())
     return filter_items(all_items, keyword)[:limit]
 
+def fetch_official_blogs(limit=5, keyword=None):
+    """Fetch recent-looking posts from AI company official blog index pages."""
+    all_items = []
+    seen_urls = set()
+    per_source_limit = max(2, (limit // max(1, len(OFFICIAL_BLOG_SOURCES))) + 1)
+    source_order = {name: idx for idx, (name, _url, _feed) in enumerate(OFFICIAL_BLOG_SOURCES)}
+
+    def fetch_index(source_name, index_url, feed_url=None):
+        items = []
+        try:
+            if feed_url:
+                return fetch_rss_feed(feed_url, source_name, per_source_limit)
+            response = requests.get(index_url, headers=HEADERS, timeout=15)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.content, 'html.parser')
+            for anchor in soup.find_all('a', href=True):
+                title = anchor.get_text(" ", strip=True)
+                if not title or len(title) < 12:
+                    continue
+                href = urljoin(index_url, anchor["href"])
+                if not href.startswith("http"):
+                    continue
+                if "#" in href or "/category/" in href or title.lower().startswith("skip to "):
+                    continue
+                path = href.split("?", 1)[0]
+                if not any(part in path for part in ["/blog", "/news", "/engineering", "/technology/ai", "/innovation-and-ai"]):
+                    continue
+                if path.rstrip("/") == index_url.rstrip("/"):
+                    continue
+                if href in seen_urls:
+                    continue
+                seen_urls.add(href)
+                items.append({
+                    "source": source_name,
+                    "title": title[:180],
+                    "url": href,
+                    "time": "Recent",
+                    "heat": "Official Blog",
+                })
+                if len(items) >= per_source_limit:
+                    break
+        except Exception as e:
+            print(f"Official blog fetch error for {source_name}: {e}", file=sys.stderr)
+        return items
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        futures = {executor.submit(fetch_index, name, url, feed): name for name, url, feed in OFFICIAL_BLOG_SOURCES}
+        for future in concurrent.futures.as_completed(futures):
+            all_items.extend(future.result())
+    for item in all_items:
+        item["title"] = re.sub(r"^<!\[CDATA\[(.*)\]\]>$", r"\1", item.get("title", "")).strip()
+    all_items.sort(key=lambda item: (source_order.get(item.get("source", ""), 999), item.get("title", "")))
+    return filter_items(all_items, keyword)[:limit]
+
 def fetch_essays(limit=5, keyword=None):
     all_items = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
@@ -622,6 +686,7 @@ def main():
         # Aggregates
         'huggingface': fetch_huggingface_papers,
         'ai_newsletters': fetch_ai_newsletters, 'podcasts': fetch_podcasts,
+        'official_blogs': fetch_official_blogs,
         'essays': fetch_essays,
         # Standalone AI Sources
         'latentspace_ainews': fetch_latentspace_ainews,

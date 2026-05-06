@@ -146,7 +146,7 @@ def main() -> int:
     blog_names = first_column_values(BLOGS_PATH)
 
     print("Step 1 — 自我介绍")
-    print("我是你的个人日报助手。每天我会帮你把综合新闻、财经、科技、AI 深度和美股自选整理成一份能直接读的 Morning Brief。")
+    print("我是你的个人日报助手。每天我会帮你把综合新闻、财经、AI 和美股自选整理成一份飞书 Morning Brief。")
     print(f"AI 深度部分会重点跟踪 {x_count} 位 AI builder 的 X 动态、{len(podcast_names)} 档顶级 AI 播客，以及 AI 公司官方博客。")
     print("")
     print("Step 2 — 语言偏好")

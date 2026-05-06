@@ -1,4 +1,8 @@
 # AI official blogs for company/product/research updates.
 # Format: name<TAB>index_url<TAB>focus
+OpenAI Blog	https://openai.com/blog	OpenAI product, research, safety, and company updates
 Anthropic Engineering	https://www.anthropic.com/engineering	technical deep dives from the Anthropic team
+Anthropic News	https://www.anthropic.com/news	Anthropic product, model, policy, and company news
 Claude Blog	https://claude.com/blog	Claude product announcements and updates
+Google AI Blog	https://blog.google/technology/ai	Google AI research, product, and infrastructure updates
+Meta AI Blog	https://ai.meta.com/blog	Meta AI research, model, open-source, and product updates

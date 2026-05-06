@@ -1,7 +1,7 @@
-# 🧠 AI Deep Dive Instructions (AI 深度日报)
+# 🧠 AI Daily Instructions (AI 日报)
 
-> **INPUT**: JSON object with `newsletter_picks`, `huggingface_papers`, and optional `x_fixed_ai_accounts`, `ai_podcasts`, `ai_official_blogs` sections.
-> **OUTPUT**: A deep-dive AI report focusing on research, industry analysis, and key tech updates.
+> **INPUT**: JSON object with `ai_product_and_dev_signals`, `newsletter_picks`, `huggingface_papers`, and optional `x_fixed_ai_accounts`, `ai_podcasts`, `ai_official_blogs` sections.
+> **OUTPUT**: An AI report that merges the former tech briefing with AI deep-dive coverage.
 
 ---
 
@@ -10,6 +10,7 @@
 2.  **Industry Analysis**: Strategic insights from top AI newsletters (ChinAI, Memia, etc.).
 3.  **X Fixed AI Builders**: Today's AI-relevant posts from the fixed builder list in `instructions/x_ai_accounts.txt`.
 4.  **Long-form AI Signals**: AI podcasts from `instructions/ai_podcasts.txt` and official blog posts from `instructions/ai_official_blogs.txt`.
+5.  **Selected Tech Signals**: developer tools, startup/product launches, infra updates, frameworks, and engineering posts should appear here only when they materially affect AI builders, AI products, model development, developer productivity, chips/infrastructure, or AI go-to-market.
 
 ## ⚠️ Anti-Laziness Protocol
 1.  **Volume**: Output MUST contain at least **15 items** across all sections.
@@ -18,8 +19,13 @@
 4.  **X route is fixed-list only**: do not use `Following`, `For you`, anonymous search, or recommended feeds as substitutes. Check the account list directly and keep only posts from the last 24 hours unless the user asks for a wider window.
 5.  **Long-form sources have a wider window**: podcasts use a default 14-day lookback. Do not force podcasts into a 24-hour news window, and do not pad the report when there are no new episodes.
 6.  **Substance filter**: skip mundane personal posts, retweets without commentary, event pleasantries, engagement bait, and pure promotion. Keep original opinions, product announcements, technical discussions, industry analysis, and lessons from builders.
+7.  **Former tech merge rule**: do not produce a standalone tech briefing in the standard daily report. Fold relevant technology items into this AI report; drop general consumer-tech or startup items unless they change the AI/product/developer landscape.
 
 ## 📝 Report Structure
+
+### Part 0: ⚙️ AI Product, Developer, and Startup Signals
+*   **Data Source**: Hacker News, GitHub Trending, Product Hunt, 36Kr, and other former tech briefing sources.
+*   **Selection**: keep only AI-relevant developer tools, model/product launches, infra, benchmarks, coding tools, AI startups, and technical releases.
 
 ### Part 1: 🔬 SOTA Research (Hugging Face Papers)
 *   **Data Source**: Hugging Face Daily Papers

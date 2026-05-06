@@ -1,11 +1,11 @@
 ---
 name: self-daily-briefing-skill
-description: "中文 Morning Brief skill。用于生成综合早报、财经早报、科技早报、AI 深度日报，以及美股自选股票早报。用户说“牛马牛马”、'早报'、'美股股票早报'、'股票日报' 时使用。"
+description: "中文 Morning Brief skill。用于生成综合早报、财经早报、AI 日报，以及美股自选股票早报，并默认创建飞书文档。用户说“牛马牛马”、'早报'、'美股股票早报'、'股票日报' 时使用。"
 ---
 
 # 中文 Morning Brief skill
 
-用于生成中文日报。默认直接在对话中输出日报内容；只有用户明确要求 PDF、Markdown、HTML、保存文件或其他格式时，才导出对应文件。
+用于生成中文日报。默认使用 `lark-doc` skill 在用户的飞书个人空间创建飞书文档，并返回飞书文档链接；不再默认输出 Markdown 文件或 PDF 文件。
 
 ## 严格规则
 
@@ -13,13 +13,15 @@ description: "中文 Morning Brief skill。用于生成综合早报、财经早�
 - 首次 onboarding 完成后再继续用户的原始任务。如果用户只是说“牛马牛马”，onboarding 后展示菜单；如果用户是第一次直接要求生成日报，onboarding 后继续生成对应日报。
 - 后续使用时不要重复 onboarding；只有用户明确说“重新设置日报偏好”“修改语言/股票/关注主题”时才重新进入设置流程。
 - 如果用户没有指定日报类型，默认生成“标准日报”。
-- 默认输出渠道是当前对话：直接给出完整日报正文，不保存文件，不让用户跳转找文件。
-- 如果用户没有指定日报类型，默认生成“标准日报”并直接在对话里输出。
-- 只有用户明确要求 PDF、Markdown、HTML、保存文件、原始数据或过程文件时，才生成并交付对应文件。
+- 默认输出渠道是飞书云文档：生成日报正文后，必须调用 `lark-doc` skill 的 `docs +create` 在用户的飞书个人空间创建文档，并返回 `doc_url`。
+- 如果用户没有指定日报类型，默认生成“标准日报”并创建飞书文档。
+- 不再默认输出 `.md` 或 `.pdf` 文件；只有用户额外明确要求 PDF、Markdown、HTML、本地保存、原始数据或过程文件时，才生成并交付对应文件。
+- 使用 `docs +create` 时，文档 `title` 使用 `Morning Brief | YYYY-MM-DD` 或对应单板块标题；Markdown 内容开头不要重复同名一级标题。
+- 如果文档以 bot 身份创建，必须按 `lark-doc` skill 规则尝试给当前 user 添加管理员权限，并在回复里说明授权结果。
 - 如果用户要求 PDF，使用本文的 PDF 导出规则；PDF 导出失败时，不要把 Markdown/HTML/低保真 PDF 冒充最终产物，必须明确说明 PDF 被阻塞。
-- 如果用户要的是“标准日报”，默认生成包含综合/财经/科技/AI 深度/美股的完整日报；如果用户只要某个模块，再单独生成对应模块。
+- 如果用户要的是“标准日报”，默认生成包含综合/财经/AI/美股的完整日报；如果用户只要某个模块，再单独生成对应模块。
 - 生成标准日报前，必须先生成或读取各板块源文件，再按固定顺序组装。
-- 生成标准日报时，`general_report.md`、`finance_report.md`、`tech_report.md`、`ai_daily_report.md` 这四个板块把源文件内容视为最终内容，直接拼接，不要二次改写、二次摘要、重写观点。
+- 生成标准日报时，`general_report.md`、`finance_report.md`、`ai_daily_report.md` 这三个板块把源文件内容视为最终内容，直接拼接；历史 `tech_report.md` 只作为兼容输入，必须并入 AI 日报，不再作为独立板块输出。
 - 标准日报展示时，为避免双层标题重复，保留标准日报稿里的外层章节标题，去掉各源文件自身的首个 `# 标题` 行后再拼接正文。
 - 标准日报稿的章节标题应保留视觉识别，推荐使用带 emoji 的外层标题，例如 `🌅 一、综合早报`、`💰 二、财经早报`。
 - 标题层级应保持一致：标准日报稿主标题用 `#`，五个外层章节用 `##`，章节内部的小分组和“数据缺口”统一用 `###`。
@@ -31,10 +33,11 @@ description: "中文 Morning Brief skill。用于生成综合早报、财经早�
   - 板块分隔符；
   - 美股股票早报板块；
   - 明确的数据缺口说明。
+- 标准日报发布前必须做板块间去重：按 `财经 > AI > 科技兼容输入 > 综合` 的顺序检查候选重复，但最终归属优先保留在综合早报；如果综合已收录同一事件，财经/AI/科技兼容输入只保留明确不同的价格、政策、模型、论文、产品或交易影响，否则删除重复条目。
 - 如果某一板块已有当天源文件，就优先复用该源文件；不要为了“统一文风”重写。
 - 如果用户直接给了某个板块的完整版本，按用户版本原文覆盖该板块，不要改写措辞。
 - 缺数据就写缺口，不补推断性内容。
-- 综合/财经/科技这类“今天发生了什么”的板块，默认只收当天新增事件或当天有明确新进展的延续事件。
+- 综合/财经/AI 里承载“今天发生了什么”的条目，默认只收当天新增事件或当天有明确新进展的延续事件。
 - 当前默认时效门槛是**最近 24 小时**；不满足这个窗口的条目不得因为“缺内容”而自动补进今天成稿。
 - 如果某条信息只是前几天已经写过的旧闻、今天没有明确增量，就不能伪装成今天头条；要么删掉，要么明确标记为“延续跟踪”。
 - 生成综合早报前，必须对最近 3 天内已交付的同类成稿做标题级去重检查；如果同一事件已经在近几天做过主条且今天没有实质新进展，不得再次放进 `全网速览` 前列。
@@ -77,7 +80,7 @@ description: "中文 Morning Brief skill。用于生成综合早报、财经早�
 
 首次 onboarding 按 4 步走：
 
-1. **自我介绍**：说明这个 skill 会生成综合、财经、科技、AI 深度和美股自选 Morning Brief。
+1. **自我介绍**：说明这个 skill 会生成综合、财经、AI 和美股自选 Morning Brief，并默认创建飞书文档。
 2. **语言偏好**：询问中文、英文或双语；默认中文，并保留关键英文产品名、论文名和公司名。
 3. **股票跟踪偏好和额外关注**：询问美股 ticker 列表，以及用户想长期关注的公司、产品、人物或主题。如果用户说没有，告诉用户会先用 Mag 7（AAPL、MSFT、NVDA、AMZN、GOOGL、META、TSLA）作为默认名单，以后随时能改。
 4. **展示信息源并询问是否运行一遍**：展示 X builders、播客、官方博客等默认源，问用户是否现在先跑一版看效果。
@@ -116,17 +119,13 @@ python3 scripts/onboarding.py --force
   - Tencent 财经
   - Hacker News 金融/加密关键词
 
-### 3. 科技早报
-- 适用场景：要看 AI、开发工具、创业产品
+### 3. AI 日报
+- 适用场景：要看前沿论文、AI 行业观点、AI 官方博客、AI builders，以及对 AI 产品/开发者/创业有实质影响的科技动态
 - 信息源：
   - GitHub Trending
   - Hacker News
   - Product Hunt
   - 36Kr
-
-### 4. AI 深度日报
-- 适用场景：要看前沿论文和 AI 行业观点
-- 信息源：
   - Hugging Face Papers
   - X Fixed AI Builders（登录个人 X 账号后抓取固定 builder 账号列表的今日热帖）
   - AI Podcasts（6 档顶级 AI 播客，默认 14 天窗口）
@@ -137,7 +136,7 @@ python3 scripts/onboarding.py --force
   - Memia
   - Interconnects
 
-#### AI 深度日报里的 X 板块规则
+#### AI 日报里的 X 板块规则
 
 - X 不是匿名抓公开搜索，也不再依赖 `Following` 或 `For you` 推荐流，而是复用用户登录态打开固定 builder 账号列表逐个查看。
 - 固定账号列表见 `instructions/x_ai_accounts.txt`，按 `follow-builders` 的 builder 取向维护，关注真实做产品、做研究、经营公司的人，而不是泛搬运账号。
@@ -166,7 +165,7 @@ python3 scripts/onboarding.py --force
 - 播客列表见 `instructions/ai_podcasts.txt`，默认包含 Latent Space、Training Data、No Priors、Unsupervised Learning、The MAD Podcast with Matt Turck、AI & I by Every。
 - 播客默认窗口是最近 14 天；播客不是日更源，不能套 24 小时硬过滤，也不要因为当天没有新节目就写大段缺口。
 - 播客摘要应先给一句 `The Takeaway`，再说明嘉宾是谁、为什么值得关注，并优先提炼反直觉、具体经验、产品判断和研究路线判断。
-- 官方博客列表见 `instructions/ai_official_blogs.txt`，默认包含 Anthropic Engineering 和 Claude Blog。
+- 官方博客列表见 `instructions/ai_official_blogs.txt`，默认包含 OpenAI Blog、Anthropic Engineering、Anthropic News、Claude Blog、Google AI Blog、Meta AI Blog。
 - 官方博客摘要要优先写清核心公告、产品能力、研究发现、API/能力变化、关键数字或 benchmark；没有原文链接的内容不要写入日报。
 
 #### 登录态浏览器执行约定
@@ -217,7 +216,7 @@ python3 scripts/onboarding.py --force
 
 ## 日报格式示例
 
-说明里要给出最终 Markdown 的样子，不只讲规则。每个日报板块至少放 1-2 个条目示例，最后用 `...省略` 表示完整报告会更长。
+说明里要给出最终飞书文档 Markdown 正文的样子，不只讲规则。每个日报板块至少放 1-2 个条目示例，最后用 `...省略` 表示完整报告会更长。
 
 ### 标准日报示例约束
 
@@ -232,7 +231,7 @@ python3 scripts/onboarding.py --force
 
 ---
 
-## 📈 五、美股股票早报
+## 📈 四、美股股票早报
 
 ...这里放美股正文...
 
@@ -240,8 +239,8 @@ python3 scripts/onboarding.py --force
 
 > 生成时间：2026-03-11 14:58 CST  
 > 数据窗口：以当天公开网页和统一行情快照为准。  
-> 说明：综合/财经/科技/AI 深度板块以下均直接来自已有日报内容。  
-> 合并来源：general_report.md / finance_report.md / tech_report.md / ai_daily_report.md + 美股股票早报
+> 说明：综合/财经/AI 板块以下均直接来自已有日报内容，已完成板块间去重。
+> 合并来源：general_report.md / finance_report.md / ai_daily_report.md + 美股股票早报
 ```
 
 ### 综合早报示例
@@ -285,32 +284,22 @@ python3 scripts/onboarding.py --force
 ...省略
 ```
 
-### 科技早报示例
+### AI 日报示例
 
 ```markdown
-# 🤖 科技早报 | 2026-03-11
+# 🧠 AI 日报 | 2026-03-11
 
-## 🚨 AI 前沿
+## ⚙️ AI 产品、开发者工具与创业信号
 
 #### 1. [Show HN: ClawSoc – Observe Your AI Agent in an AI Society](https://example.com)
 - **Source**: Hacker News | **Time**: Today
 - **Summary**: 开发者在“多 agent 社会”里观察 agent 行为。
 - **Deep Dive**: 💡 **Insight**: 单 agent 评测正在失效，多体系统会成为下一代 agent 产品的关键壁垒。
 
-## 🛠️ 开发者工具
-
 #### 2. [promptfoo](https://github.com/promptfoo/promptfoo)
 - **Source**: GitHub Trending | **Time**: Today
 - **Summary**: 面向 prompts、agents 和 RAG 的测试与红队工具。
 - **Deep Dive**: 💡 **Insight**: AI 工具链正在补齐 QA 和安全评测环节。
-
-...省略
-```
-
-### AI 深度日报示例
-
-```markdown
-# 🧠 AI 深度日报 | 2026-03-11
 
 ## 🔬 SOTA Research
 
@@ -361,13 +350,12 @@ python3 scripts/onboarding.py --force
 
 ## 输出规则
 
-- 默认在当前对话直接输出日报正文，格式参考 `follow-builders`：标题、分组、条目摘要、来源链接和必要的判断，用户不用跳转文件。
-- 如果用户要求 Markdown，可以在对话中输出 Markdown，或按用户指定路径保存 `.md`。
+- 默认创建飞书文档并返回链接，格式参考 `follow-builders`：标题、分组、条目摘要、来源链接和必要的判断。
+- 默认不输出本地 Markdown 文件；如果用户要求 Markdown，可以在对话中输出 Markdown，或按用户指定路径保存 `.md`。
 - 如果用户要求 PDF，建议文件名：
   - `reports/YYYY-MM-DD/morning_brief_YYYY-MM-DD.pdf`
   - `reports/YYYY-MM-DD/general_report_YYYY-MM-DD.pdf`
   - `reports/YYYY-MM-DD/finance_report_YYYY-MM-DD.pdf`
-  - `reports/YYYY-MM-DD/tech_report_YYYY-MM-DD.pdf`
   - `reports/YYYY-MM-DD/ai_daily_report_YYYY-MM-DD.pdf`
   - `reports/YYYY-MM-DD/us_stocks_report_YYYY-MM-DD.pdf`
 - `*.html`、`*.json`、`*.png`、`*_snapshot.*` 默认都视为过程文件；除非用户明确要求，不要交付。
@@ -380,7 +368,6 @@ python3 scripts/onboarding.py --force
 ```bash
 python3 scripts/daily_briefing.py --profile general --no-save
 python3 scripts/daily_briefing.py --profile finance --no-save
-python3 scripts/daily_briefing.py --profile tech --no-save
 python3 scripts/daily_briefing.py --profile ai_daily --no-save
 ```
 
@@ -388,8 +375,9 @@ python3 scripts/daily_briefing.py --profile ai_daily --no-save
 - 语言：简体中文
 - 必带字段：标题、时间、摘要、Deep Dive
 - 不编造新闻，不补不存在的数据
-- 对综合 / 财经 / 科技 / AI 深度板块，先经过 `最近 24 小时` 过滤，再做近 3 天成稿去重；过不了这两道门槛的条目不能进入最终稿。
-- 默认直接按对应 instructions 在对话里生成日报正文。
+- 对综合 / 财经 / AI 板块中属于当天新闻流的条目，先经过 `最近 24 小时` 过滤，再做近 3 天成稿去重；过不了这两道门槛的条目不能进入最终稿。
+- 标准日报组装前必须执行跨板块去重；综合优先保留，同一事件不得在多个板块重复展开。
+- 默认按对应 instructions 生成日报正文并创建飞书文档。
 - 只有用户要求 PDF 或保存文件时，才生成临时 Markdown/HTML 并走导出流程。
 
 ## 标准日报工作流
@@ -397,19 +385,17 @@ python3 scripts/daily_briefing.py --profile ai_daily --no-save
 1. 先确认本轮是否已有以下源稿内容：
    - `reports/YYYY-MM-DD/general_report.md`
    - `reports/YYYY-MM-DD/finance_report.md`
-   - `reports/YYYY-MM-DD/tech_report.md`
    - `reports/YYYY-MM-DD/ai_daily_report.md`
 2. 如果不存在，就先按对应 profile 生成源稿内容。
 2.1 对 raw items 先执行近 24 小时过滤；可复用 `scripts/filter_recent_brief_items.py` 对候选条目做时效与近 3 天去重检查。
 3. 生成标准日报时按以下顺序组装：
    - 综合早报
    - 财经早报
-   - 科技早报
-   - AI 深度日报
+   - AI 日报
    - 美股股票早报
-4. 对前四个板块，直接贴源文件原文，不改写。
+4. 对综合、财经、AI 板块，直接贴源文件原文；只允许为跨板块去重删除重复条目。
 5. 美股板块单独生成；如果用户提供了更完整的版本，用用户版本覆盖。
-6. 默认直接在对话中输出标准日报。
+6. 默认使用 `lark-cli docs +create --title "Morning Brief | YYYY-MM-DD" --markdown ...` 创建飞书文档，并返回文档链接。
 6.1 如果用户要求 PDF，走“Markdown -> HTML 阅读页 -> 可用浏览器打印 PDF”：可以复用 `scripts/export_pdf_with_system_chrome.sh`，也可以使用运行环境提供的等价浏览器打印能力；禁止回退到会截断长文的 `file:// + print-to-pdf`。
 7. 如果用户指定路径或格式，则按用户要求保存；不要额外保存无关格式，除非用户明确要求。
 

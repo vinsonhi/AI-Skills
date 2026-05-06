@@ -6,7 +6,7 @@ from fetch_news import (
     fetch_hackernews, fetch_github, fetch_producthunt, 
     fetch_weibo, fetch_36kr, fetch_tencent, fetch_v2ex, fetch_wallstreetcn,
     fetch_huggingface_papers, fetch_ai_newsletters, fetch_podcasts, fetch_essays,
-    enrich_items_with_content
+    fetch_official_blogs, enrich_items_with_content
 )
 
 import argparse
@@ -108,14 +108,27 @@ PROFILES = {
     },
 
 
-    # 6. AI Daily (AI Deep Dive)
+    # 6. AI Daily (AI Deep Dive, including selected former tech signals)
     "ai_daily": {
+        "ai_product_and_dev_signals": {
+            "sources": [
+                (fetch_hackernews, 25, "AI,LLM,Transformer,Diffusion,Model,RAG,Agent,Coding"),
+                (fetch_github, 15, "AI,LLM,GPT,Agent,Coding"),
+                (fetch_producthunt, 15, "AI,Developer Tools,Coding,API"),
+                (fetch_36kr, 15, "AI,大模型,模型,智能体,融资,首发"),
+            ],
+            "enrich": True
+        },
         "newsletter_picks": {
             "sources": [(fetch_ai_newsletters, 100, None)], # Capture all (approx 30-40)
             "enrich": True
         },
         "huggingface_papers": {
             "sources": [(fetch_huggingface_papers, 20, None)], 
+            "enrich": True
+        },
+        "ai_official_blogs": {
+            "sources": [(fetch_official_blogs, 30, None)],
             "enrich": True
         }
     },

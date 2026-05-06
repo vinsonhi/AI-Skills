@@ -1,5 +1,7 @@
 # 🤖 Daily Tech Briefing Instructions (今日科技早报)
 
+> Deprecated for the standard daily report: technology items now belong in `briefing_ai_daily.md` when they materially affect AI products, developer tools, model infrastructure, or AI startups. Keep this file only for backward compatibility when a user explicitly asks for the legacy tech-only report.
+
 > **INPUT**: JSON object with `ai_frontier`, `hard_tech`, `dev_tools`, `startups` sections.
 > **OUTPUT**: A deep-tech newsletter for engineers and founders.
 
