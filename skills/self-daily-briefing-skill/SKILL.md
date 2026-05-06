@@ -138,15 +138,15 @@ python3 scripts/onboarding.py --force
 
 #### AI 日报里的 X 板块规则
 
-- X 不是匿名抓公开搜索，也不再依赖 `Following` 或 `For you` 推荐流，而是复用用户登录态打开固定 builder 账号列表逐个查看。
+- X 不是匿名抓公开搜索，也不再依赖 `Following` 或 `For you` 推荐流。默认先用 `scripts/fetch_x_fixed_ai_builders.py` 跑固定 builder 账号列表：先尝试本地登录态 Chrome；如果不可用，再读取 `follow-builders` 的公共 central feed；两者都失败才写 X 数据缺口。
 - 固定账号列表见 `instructions/x_ai_accounts.txt`，按 `follow-builders` 的 builder 取向维护，关注真实做产品、做研究、经营公司的人，而不是泛搬运账号。
-- 对这类登录态来源，默认先复用用户已经登录 X 的浏览器会话或运行环境提供的等价登录态，不要直接用匿名搜索、推荐流、无状态浏览器替代固定账号列表。
+- 对这类来源，默认先复用用户已经登录 X 的浏览器会话或运行环境提供的等价登录态；登录态不可用时允许读取 `follow-builders` 公共 central feed 作为固定账号 fallback。不要用匿名搜索、推荐流、无状态浏览器替代固定账号列表。
 - 可接受的登录态方式包括：
   - Agent 提供的已登录浏览器会话；
   - 用户授权的浏览器 profile / cookie bridge；
   - 用户在当前浏览器自动化环境中手动登录后的会话；
   - 其他能稳定访问固定账号主页的等价机制。
-- 不要把“某个隔离浏览器没登录”误判成“用户 X 登录态失效”。只有确认当前可用登录态都无法访问 X 后，才允许标记为登录态失效。
+- 不要把“某个隔离浏览器没登录”误判成“用户 X 登录态失效”。本地登录态不可用时，先尝试 `follow-builders` central feed。
 - 必须逐个检查固定列表中的账号主页；不要用推荐流替代固定列表，也不要只看用户自己的关注流。
 - 数据窗口默认只看最近 24 小时。
 - 热度排序不能只看点赞，要综合 replies / reposts / likes / views / bookmarks。
@@ -155,10 +155,10 @@ python3 scripts/onboarding.py --force
 - 如果没有外链，再基于推文本身做摘要和解读。
 - 最终输出仍要遵守日报格式：`Source`、`Time`、`Summary`、`Deep Dive`。
 - 缺正文就写缺口，不要把猜测当事实。
-- 如果 X 或其他需要登录的来源出现登录过期、登录页、扫码、验证码、或权限校验，不能把它当作普通“数据缺口”直接跳过。
-- 在判定“登录态失效”之前，必须先验证当前运行环境可访问的真实登录态；如果只是临时 profile、隔离浏览器或无状态 context 没有登录，不算用户登录态失效。
-- 只有在可用登录态都失效时，才允许明确标记为“登录态失效”，并停在可恢复步骤上。
-- 登录失效时，不能私自改用匿名抓取、公开搜索、替代站点、或完全不同的技术路线来冒充同一数据源。
+- 如果本地 X 登录态出现登录过期、登录页、扫码、验证码、或权限校验，先切到 `follow-builders` central feed fallback；fallback 也失败时，才能写明确的 X 数据缺口。
+- 在判定“X 数据缺口”之前，必须先验证当前运行环境可访问的真实登录态，并尝试 `follow-builders` central feed fallback；如果只是临时 profile、隔离浏览器或无状态 context 没有登录，不算最终失败。
+- 只有本地固定账号抓取和 `follow-builders` central feed 都失败时，才允许明确标记 X 数据缺口。
+- 登录失效时，不能私自改用匿名抓取、公开搜索、推荐流或替代站点来冒充同一数据源；只允许使用 `follow-builders` central feed 这个固定账号 fallback。
 
 #### AI 播客和官方博客规则
 
@@ -176,6 +176,7 @@ python3 scripts/onboarding.py --force
   - `scripts/real_chrome_helpers.py`
   - `scripts/check_x_personal_chrome_session.py`
   - `scripts/extract_x_accounts_with_personal_chrome.py`
+  - `scripts/fetch_x_fixed_ai_builders.py`
   - `scripts/export_pdf_with_system_chrome.sh`
   - `scripts/filter_recent_brief_items.py`
 - 上述 Chrome helper 脚本是 macOS + Google Chrome 的参考实现；其他 Agent 或运行环境可以用等价浏览器会话、cookie bridge、浏览器 MCP 或人工登录流程替代。
@@ -183,22 +184,22 @@ python3 scripts/onboarding.py --force
 
 ### 5. 美股股票早报
 - 适用场景：要看自选股票的最新价格、涨跌、驱动因素和重要新闻
-- 默认观察名单：见 `instructions/us_stocks_watchlist_default.txt`；公开版本默认内置 Mag 7（AAPL、MSFT、NVDA、AMZN、GOOGL、META、TSLA），用户可在 onboarding 或后续对话中改成自己的名单
+- 默认观察名单：必须读取本地已安装 skill 的 `instructions/us_stocks_watchlist_default.txt`；公开版本默认内置 Mag 7（AAPL、MSFT、NVDA、AMZN、GOOGL、META、TSLA），用户可在 onboarding 或后续对话中改成自己的名单
 - 信息源：
-  - 最新价格：优先用 `web.finance`
+  - 最新价格：优先用 `scripts/fetch_us_stocks_snapshot.py` 读取本地 watchlist 并生成同轮批量快照；Agent 环境可用时再用 `web.finance` 交叉核对
   - 涨跌幅：用最新价和昨收价计算
   - 驱动因素：公司 IR、财报、官方博客、官方新闻稿
   - 重要新闻：优先 Reuters，其次公司官网和权威媒体
 - 如果某个网页源、爬虫链路或公开 API（例如 Yahoo 页面 / 无认证接口）被频控、超时、或返回不稳定结果，**不能**直接把整块标成“拿不到”。
 - 正确处理顺序是：
-  1. 先用同一轮 `web.finance` 批量拿完整观察名单快照；
-  2. 若 `web.finance` 本身失败，再尝试其他能一次性返回同轮价格的正式来源；
+  1. 先运行 `python3 scripts/fetch_us_stocks_snapshot.py`，用本地 watchlist 批量拿完整观察名单快照；
+  2. 若 Agent 环境支持 `web.finance`，可作为同轮交叉核对源；
   3. 只有当“同轮批量快照”这件事本身确实失败时，才允许写数据缺口。
 - 禁止因为单一来源失败，就回退成旧日报数字、逐只股票零散搜价、或连续几天都保留同样的“统一快照缺口”占位。
 - 禁止把 Google Finance / Yahoo / 搜索结果页上的单页 quote 当作主价格源直接写进日报；这些来源只能用于排错，不可替代同轮批量快照。
 - 时间口径规则：
   - 默认使用“生成时最新价快照”，不是自动回退成“上一交易日收盘后版本”。
-  - 全部股票必须来自同一轮 `web.finance` 查询，不能混用不同时间点或不同来源的价格。
+  - 全部股票必须来自同一轮批量快照，不能混用不同时间点或不同来源的价格。
   - 报告顶部必须写清 `as of` 时间；如果美股正在交易，要明确写“盘中最新价快照”。
   - 只有当用户明确要求“收盘版 / 复盘版 / 对应美东某交易日收盘后版本”时，才允许按收盘口径写，并且标题和注释都要写清对应交易日。
   - 分析和一句话判断必须和同一轮价格口径一致；不能拿前一日收盘分析去解释当前盘中价格。
@@ -402,7 +403,7 @@ python3 scripts/daily_briefing.py --profile ai_daily --no-save
 ## 美股股票早报工作流
 
 1. 读取用户给的股票列表；如果没给，就用默认观察名单。
-2. 用一次 `web.finance` 调用获取所有股票的最新价格和昨收，锁定为同一轮行情快照。
+2. 默认运行 `python3 scripts/fetch_us_stocks_snapshot.py --out reports/YYYY-MM-DD/us_stocks_snapshot.json`，脚本会读取本地 watchlist，获取所有股票的最新价格和昨收，锁定为同一轮行情快照。
 2.1 立刻把原始快照写入临时文件，并运行 `scripts/validate_us_stocks_snapshot.py`：
    - 校验观察名单是否齐全；
    - 校验关键数字字段是否完整；

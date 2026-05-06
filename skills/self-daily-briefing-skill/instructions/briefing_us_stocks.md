@@ -4,7 +4,7 @@
 
 给用户的自选股票生成一份中文日报，覆盖价格变化、关键驱动和重要新闻。
 
-如果用户没有显式提供股票列表，默认读取 `instructions/us_stocks_watchlist_default.txt`。公开版本默认内置 Mag 7：AAPL、MSFT、NVDA、AMZN、GOOGL、META、TSLA。
+如果用户没有显式提供股票列表，必须默认读取**本地已安装 skill** 的 `instructions/us_stocks_watchlist_default.txt`。公开版本默认内置 Mag 7：AAPL、MSFT、NVDA、AMZN、GOOGL、META、TSLA，但安装后的本地文件优先级更高。
 
 如果本地默认名单意外为空，不要把美股模块空着；先使用 Mag 7 作为默认观察名单，并提示用户之后可以改成自己的自选股。
 
@@ -21,15 +21,16 @@
 
 ## 数据源优先级
 
-1. `web.finance`
-2. 公司 IR / 财报 / 官方博客 / 官方新闻稿
-3. Reuters
-4. 其他权威媒体
+1. `scripts/fetch_us_stocks_snapshot.py` 读取本地 watchlist 并生成同轮批量快照。
+2. `web.finance` 可作为 Agent 环境中的主行情源或交叉核对源。
+3. 公司 IR / 财报 / 官方博客 / 官方新闻稿。
+4. Reuters。
+5. 其他权威媒体。
 
 ## 强制校验
 
-- 价格主源只能是**同一轮** `web.finance` 批量快照。
-- 如果观察名单里任意 ticker 没拿到同轮主快照，**整块股票板块直接写数据缺口并停止**，不要回退到 Google Finance / Yahoo / 单页 quote 搜价来拼一版“差不多”的数字。
+- 价格主源必须是**同一轮**批量快照；默认用 `scripts/fetch_us_stocks_snapshot.py`，不要手写 Mag 7，也不要跳过本地 watchlist。
+- 如果观察名单里任意 ticker 没拿到同轮主快照，**整块股票板块直接写数据缺口并停止**，不要回退到 Google Finance / 单页 quote / 搜索结果价签来拼一版“差不多”的数字。
 - 生成 Markdown 前必须做二次校验：
   1. 校验返回 ticker 集合与观察名单完全一致。
   2. 校验每只股票都有 `price`、`change`、`change_percent`、`latest_trade_time`。
@@ -38,6 +39,18 @@
 - 如果漂移检测出现明显异常，例如价格差异超过 `1%`、交易所映射明显不对、时间戳显著早于其他股票，必须把股票板块标记为“已阻断 / 待核实”，不要继续输出方向判断。
 - 股票判断只能在价格校验通过后生成；如果价格没过校验，就不要写“强 / 弱 / 继续上冲 / 回撤”这类结论。
 - 建议把原始主快照一起落盘，方便成稿后追溯。
+
+## 推荐命令
+
+```bash
+python3 scripts/fetch_us_stocks_snapshot.py --out reports/YYYY-MM-DD/us_stocks_snapshot.json
+```
+
+如果用户临时指定 ticker：
+
+```bash
+python3 scripts/fetch_us_stocks_snapshot.py --tickers "NVDA,AMD,GOOG"
+```
 
 ## 输出格式
 
