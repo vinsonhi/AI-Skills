@@ -21,7 +21,7 @@
 - AI 日报：论文、AI builders、播客、官方博客、newsletter，以及对 AI 产品/开发者/创业有实质影响的科技动态
 - 美股股票早报：自选股价格、涨跌原因、重要新闻和一句话判断
 
-默认会在你的飞书空间创建一篇飞书文档，并把文档链接发给你；不再默认导出 PDF 或 Markdown 文件。
+默认会在你的飞书空间创建一篇飞书文档，并把文档链接发给你；可自选 PDF 或 Markdown 文件。
 
 <img src="assets/morning-brief-preview.svg" alt="Morning Brief 预览" width="520">
 
