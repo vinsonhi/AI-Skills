@@ -1,11 +1,26 @@
 ---
 name: hyperframes-product-promo-video
-description: Create or revise Chinese product launch, feature introduction, and operation tutorial videos from real UI recordings, screenshots, GIFs, copy, logos, and voiceover requirements. Use when the user wants a HyperFrames-based product promo or explainer video that must preserve real product UI, confirm a verbatim voiceover and shot-by-shot script before rendering, synthesize Mandarin narration with Volcengine Seed-TTS 2.0, apply the standard Douyin Live Industry Product Team watermark and end card, and optionally add user-specified click highlights.
+description: Create or revise Chinese product launch, feature introduction, and operation tutorial videos from real UI recordings, screenshots, GIFs, copy, logos, and voiceover requirements. Use when the user wants a consistent HyperFrames-based Microsoft Fluent product promo with real UI as the visual truth, bundled product-launch music and UI sound effects, script confirmation before rendering, Volcengine Seed-TTS 2.0 Mandarin narration, the standard Douyin Live Industry Product Team watermark and end card, and optional user-specified click highlights.
 ---
 
 # HyperFrames 产品宣传视频
 
 把用户提供的真实录屏、截图、GIF、文字和品牌物料制作成中文产品宣传或操作讲解视频。真实产品 UI 是视觉主体，不要把素材重新设计成抽象 dashboard。
+
+## 默认成片预设
+
+除非用户明确指定其他风格，必须使用本 Skill 的“抖音直播机构版 Fluent 产品宣传片”预设，不得临时自由发挥成另一套风格：
+
+- 画面规范：[references/default-video-style.md](references/default-video-style.md)
+- 声音与混音：[references/audio-style.md](references/audio-style.md)
+- 项目视觉模板：[assets/templates/DESIGN.md](assets/templates/DESIGN.md)
+- 品牌规范：[references/brand-spec.md](references/brand-spec.md)
+
+新建 HyperFrames 项目时，将 `assets/templates/DESIGN.md` 复制到项目根目录作为 `DESIGN.md`，再根据用户真实 UI 的原始品牌色做有限调整。禁止只写一句“Microsoft Fluent 风格”就开始制作。
+
+默认成片特征：蓝白渐变画布、亚克力半透明框架、柔和层叠光影、企业生产力工具质感、固定中心构图、真实 UI 大面积呈现、平滑转场、底部亚克力字幕、专业普通话配音、轻量但有推进感的产品宣传配乐、克制的 UI 操作音效、右下角团队水印和 2 秒品牌结束页。
+
+如果用户没有指定画幅、时长或渠道，在脚本提案中给出 `1920×1080、30fps、约 25–45 秒` 的建议值并等待确认；不要在用户确认前把建议当成最终规格。
 
 ## 硬门禁
 
@@ -77,6 +92,8 @@ https://www.volcengine.com/docs/6561/2528925?lang=zh
 6. 屏幕字幕、转场、音乐和音效说明；
 7. 仍需用户确认的内容。
 
+脚本中的音乐与音效不能只写“科技感 BGM”。必须按 [references/audio-style.md](references/audio-style.md) 标注开场建立、功能推进、重点强调和结尾收束，并写出哪些可见点击需要 `tab.wav`、`card.wav` 或 `ai-open.wav`。
+
 逐镜脚本使用此结构：
 
 | 时间 | 画面与素材 | 配音逐字稿 | 屏幕文字 | 音乐/音效 |
@@ -121,7 +138,7 @@ python3 scripts/tts_volc.py script.txt narration.mp3 --speech-rate 12
 
 ## 第四步：用 HyperFrames 制作
 
-先读取项目 `DESIGN.md`；没有则根据用户给出的品牌风格建立。将真实录屏和截图作为强视觉参考：
+先读取项目 `DESIGN.md`；没有则复制 [assets/templates/DESIGN.md](assets/templates/DESIGN.md)。完整读取并执行 [references/default-video-style.md](references/default-video-style.md) 与 [references/audio-style.md](references/audio-style.md)。将真实录屏和截图作为强视觉参考：
 
 - 保留真实 UI 构图、页面比例、表格层级、卡片结构和产品配色；
 - 不虚构按钮、数字、页面和操作；
@@ -132,7 +149,17 @@ python3 scripts/tts_volc.py script.txt narration.mp3 --speech-rate 12
 
 需要 first frame / last frame 时，从原视频自动抽取合适帧；支持 reference video 的工作流中，将对应录屏绑定到对应段落。
 
-配乐应有产品宣传片的推进感，但低于人声；操作点击可使用轻量 UI 音效；Logo 出现时可加入干净的收束音。
+### 默认音乐与音效资产
+
+默认复制以下资产到项目中，并按 [references/audio-style.md](references/audio-style.md) 混音：
+
+- `assets/audio/product-promo-music.wav`：默认产品宣传配乐；
+- `assets/audio/tab.wav`：页签、轻按钮点击；
+- `assets/audio/card.wav`：卡片展开、页面结果出现；
+- `assets/audio/ai-open.wav`：AI 总结、智能结果展开；
+- `assets/audio/logo-sting.wav`：结束页收束音。
+
+音乐不是可有可无的装饰。默认必须加入，除非用户明确要求无配乐。音乐应有可感知的产品发布推进感，但不能压住人声；可见的关键操作默认加入少量 UI 音效，禁止每次鼠标移动都发声。
 
 ## 默认品牌规范
 
@@ -194,6 +221,9 @@ python3 scripts/tts_volc.py script.txt narration.mp3 --speech-rate 12
 - 确认结束页完整停留 2 秒；
 - 确认 Logo 使用原始资产；
 - 确认音乐没有盖过人声；
+- 确认正片不是“只有配音的干视频”，音乐在普通扬声器上可感知且有推进；
+- 确认配乐开头、功能段和结束页的能量变化符合 `audio-style.md`；
+- 确认字幕、UI 框架、背景、阴影和转场符合默认 Fluent 预设；
 - 对关键点击和转场抽帧复核。
 
 最终交付新文件，不覆盖用户已确认的旧版本。文件名应包含版本特征，例如：

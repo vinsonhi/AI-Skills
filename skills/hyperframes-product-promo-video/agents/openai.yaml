@@ -1,4 +1,4 @@
 interface:
   display_name: "HyperFrames 产品宣传视频"
-  short_description: "先确认脚本，再用真实产品素材制作带品牌规范和火山配音的宣传视频"
-  default_prompt: "请使用这个 skill，先根据我提供的录屏、截图和文字生成逐字稿与分镜脚本；等我确认后，再用 HyperFrames 制作产品宣传视频。"
+  short_description: "用真实 UI、Fluent 预设、产品配乐和火山配音制作统一风格的宣传视频"
+  default_prompt: "请使用这个 skill，按默认的抖音直播机构版 Fluent 产品宣传片风格，根据我提供的录屏、截图和文字先生成逐字稿与分镜脚本；等我确认后，再用 HyperFrames、内置配乐和品牌规范制作视频。"
