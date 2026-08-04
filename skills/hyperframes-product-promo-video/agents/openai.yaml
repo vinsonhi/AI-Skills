@@ -1,0 +1,4 @@
+interface:
+  display_name: "HyperFrames 产品宣传视频"
+  short_description: "先确认脚本，再用真实产品素材制作带品牌规范和火山配音的宣传视频"
+  default_prompt: "请使用这个 skill，先根据我提供的录屏、截图和文字生成逐字稿与分镜脚本；等我确认后，再用 HyperFrames 制作产品宣传视频。"
