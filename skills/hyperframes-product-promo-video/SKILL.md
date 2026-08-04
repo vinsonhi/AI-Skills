@@ -185,6 +185,8 @@ python3 scripts/tts_volc.py script.txt narration.mp3 --speech-rate 12
 
 结束页视觉和动效必须遵守 [references/brand-spec.md](references/brand-spec.md)。不要重绘或替换 Logo。
 
+优先复制并使用 [assets/templates/brand-end-card.html](assets/templates/brand-end-card.html) 作为独立子合成：将模板放到项目 `compositions/brand-end-card.html`，将 Logo 复制为项目 `assets/brand/live-service-platform-institution.png`，将收束音复制为项目 `assets/audio/logo-sting.wav`。结束页必须自包含，禁止从另一条成片截取带有底层业务页面的结束片段。结束页根画布从第一帧起必须 100% 不透明；只能让卡片、Logo、分隔线和署名淡入，禁止对整个结束页根节点做 `opacity: 0 → 1` 动画。
+
 ## 可选：点击高亮
 
 点击高亮默认关闭。不要因为视频是教程就自动添加。
@@ -219,6 +221,7 @@ python3 scripts/tts_volc.py script.txt narration.mp3 --speech-rate 12
 - 完整检查配音无重叠、无截断、无抢跑；
 - 确认水印在正片全程可见、未进入结束页；
 - 确认结束页完整停留 2 秒；
+- 在结束页切入帧、切入后 `0.1s` 和 `0.3s` 分别抽帧，确认没有上一段 UI、手机轮廓、截图或视频残影；
 - 确认 Logo 使用原始资产；
 - 确认音乐没有盖过人声；
 - 确认正片不是“只有配音的干视频”，音乐在普通扬声器上可感知且有推进；
