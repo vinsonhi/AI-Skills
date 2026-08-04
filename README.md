@@ -17,4 +17,4 @@
 - [`prototype-output-skill`](./skills/prototype-output-skill/README.md)
   基于真实后台页面抓取运行态 DOM/CSS，沿用现网组件样式做高保真 HTML 原型迭代，并导出可分享的单文件原型。
 - [`hyperframes-product-promo-video`](./skills/hyperframes-product-promo-video/README.md)
-  先确认逐字稿和逐镜脚本，再用真实产品录屏、截图和火山配音制作带团队水印与品牌结束页的 HyperFrames 宣传视频。
+  先确认逐字稿和逐镜脚本，再用真实产品录屏、默认 Fluent 视觉预设、内置产品配乐、火山配音、团队水印与品牌结束页制作统一风格的 HyperFrames 宣传视频。
