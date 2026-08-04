@@ -1,0 +1,73 @@
+<template id="brand-end-card-template">
+  <div data-composition-id="brand-end-card" data-width="1920" data-height="1080">
+    <div class="brand-end-card">
+      <img class="brand-end-logo" src="assets/brand/live-service-platform-institution.png" alt="直播服务平台机构版" />
+      <div class="brand-end-line"></div>
+      <div class="brand-end-credit">抖音直播-行业产品团队出品</div>
+    </div>
+    <audio id="brandEndSting" data-start="0.12" data-duration="0.805" data-track-index="2" src="assets/audio/logo-sting.wav" data-volume="1"></audio>
+    <style>
+      @font-face { font-family: "PingFang SC"; src: local("PingFang SC"); }
+      @font-face { font-family: "Microsoft YaHei"; src: local("Microsoft YaHei"); }
+      [data-composition-id="brand-end-card"] {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 120px;
+        box-sizing: border-box;
+        font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+        background:
+          radial-gradient(circle at 83% 16%, rgba(79,145,255,.22), transparent 37%),
+          radial-gradient(circle at 13% 85%, rgba(79,145,255,.17), transparent 39%),
+          linear-gradient(135deg, #edf5ff 0%, #fbfdff 52%, #e6f0ff 100%);
+      }
+      [data-composition-id="brand-end-card"] .brand-end-card {
+        width: 850px;
+        height: 360px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 58px 72px 48px;
+        box-sizing: border-box;
+        border-radius: 34px;
+        background: rgba(255,255,255,.72);
+        border: 1px solid rgba(255,255,255,.96);
+        box-shadow: 0 20px 60px rgba(49,93,157,.16);
+        backdrop-filter: blur(20px);
+      }
+      [data-composition-id="brand-end-card"] .brand-end-logo {
+        display: block;
+        width: 620px;
+        height: auto;
+      }
+      [data-composition-id="brand-end-card"] .brand-end-line {
+        width: 400px;
+        height: 2px;
+        margin: 28px 0 25px;
+        background: rgba(51,120,246,.18);
+      }
+      [data-composition-id="brand-end-card"] .brand-end-credit {
+        color: #47627f;
+        font-size: 28px;
+        font-weight: 520;
+        line-height: 1;
+        letter-spacing: 1px;
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script>
+      window.__timelines = window.__timelines || {};
+      const brandEndCardTimeline = gsap.timeline({ paused: true });
+      // Never animate the root composition opacity. Its background must be opaque on frame one.
+      brandEndCardTimeline.from(".brand-end-card", { opacity: 0, scale: .94, y: 18, duration: .46, ease: "back.out(1.3)" }, .04);
+      brandEndCardTimeline.from(".brand-end-logo", { opacity: 0, y: 14, duration: .36, ease: "power3.out" }, .12);
+      brandEndCardTimeline.from(".brand-end-line", { opacity: 0, scaleX: .2, duration: .32, ease: "power3.out" }, .24);
+      brandEndCardTimeline.from(".brand-end-credit", { opacity: 0, y: 9, duration: .34, ease: "power2.out" }, .34);
+      window.__timelines["brand-end-card"] = brandEndCardTimeline;
+    </script>
+  </div>
+</template>

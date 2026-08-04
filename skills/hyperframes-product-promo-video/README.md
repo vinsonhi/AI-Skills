@@ -78,6 +78,8 @@ API Key 只用于当前环境调用，不应写入项目或 Git 仓库。
 
 Skill 已包含正确的抖音 Icon 和机构版 Logo，不需要重新截图或手绘。
 
+结束页使用独立的自包含模板，蓝白背景从第一帧起完全不透明，只让品牌卡片和文字进入，避免上一段产品页面或其他视频素材穿透。
+
 ## 点击高亮
 
 默认关闭。如果需要，请提供：
@@ -97,4 +99,5 @@ Codex 会让高亮在点击前出现并留出识别时间，不会猜坐标，�
 - `references/volcengine-tts.md`：火山配音设置
 - `scripts/tts_volc.py`：Seed-TTS 2.0 配音脚本
 - `assets/`：默认 DESIGN 模板、产品宣传配乐、UI 音效、标准抖音水印 Icon 和机构版 Logo
+- `assets/templates/brand-end-card.html`：不会透出上一段画面的自包含 2 秒结束页模板
 - `agents/openai.yaml`：Agent 展示配置
